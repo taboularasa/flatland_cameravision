@@ -25,7 +25,7 @@ float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
-  for(int i=0;i<numberOfPlayers;i++) trackColor[i] = color(255,0,0);
+  for(int i=0;i<numberOfPlayers;i++) trackColor[i] = color(0,0,0);
   size(320,240);
   video = new GSCapture(this,width,height,15);
   // Start off tracking for red
@@ -77,14 +77,14 @@ void draw() {
 
   for(int i=0;i<numberOfPlayers;i++)
   {
-    if (worldRecords[i] < 5) 
-    { 
+    //if (worldRecords[i] < 10) 
+    //1{ 
       // Draw a circle at the tracked pixel
       fill(trackColor[i]);
       strokeWeight(1);
       stroke(0);
       ellipse(closestX[i],closestY[i],8,8);
-    }
+    //}
   }
 }
 
