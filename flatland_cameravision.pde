@@ -4,14 +4,14 @@
 // http://www.learningprocessing.com
 
 
-import processing.video.*;
+import codeanticode.gsvideo.*;
 
 int numberOfPlayers = 2;
 //keyboard stuff
 int colorTarget;
 
 // Variable for capture device
-Capture video;
+GSCapture video;
 
 // A variable for the color we are searching for.
 color[] trackColor = new color[numberOfPlayers]; 
@@ -27,7 +27,7 @@ void setup() {
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
   for(int i=0;i<numberOfPlayers;i++) trackColor[i] = color(255,0,0);
   size(320,240);
-  video = new Capture(this,width,height,15);
+  video = new GSCapture(this,width,height,15);
   // Start off tracking for red
   smooth();
 }
@@ -77,7 +77,7 @@ void draw() {
 
   for(int i=0;i<numberOfPlayers;i++)
   {
-    if (worldRecords[i] < 10) 
+    if (worldRecords[i] < 4) 
     { 
       // Draw a circle at the tracked pixel
       fill(trackColor[i]);
