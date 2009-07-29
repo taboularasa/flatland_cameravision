@@ -6,7 +6,7 @@
 
 import codeanticode.gsvideo.*;
 
-int numberOfPlayers = 2;
+int numberOfPlayers = 8;
 //keyboard stuff
 int colorTarget;
 
@@ -77,7 +77,7 @@ void draw() {
 
   for(int i=0;i<numberOfPlayers;i++)
   {
-    if (worldRecords[i] < 4) 
+    if (worldRecords[i] < 5) 
     { 
       // Draw a circle at the tracked pixel
       fill(trackColor[i]);
