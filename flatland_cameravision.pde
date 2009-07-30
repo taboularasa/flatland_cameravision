@@ -5,6 +5,11 @@
 
 
 import codeanticode.gsvideo.*;
+import processing.net.*; 
+
+//stuff for TCP
+Client myClient;
+String serverMessage = "";
 
 //stuff for finding boundary of colors
 int colorArea = 20;
@@ -41,6 +46,7 @@ float[] worldRecords = new float[numberOfPlayers];
 void setup() {
   size(640,480);
   video = new GSCapture(this,width,height,15);
+  //myClient = new Client(this, "192.168.1.100", 51007);
   for(int i=0;i<numberOfPlayers;i++)
   {
     worldRecords[i]=500;
@@ -53,7 +59,8 @@ void setup() {
 }
 
 void draw() {
-
+  //reset server message
+  serverMessage = "";
   // Capture and display the video
   if (video.available()) {
     video.read();
@@ -196,10 +203,15 @@ void draw() {
       fill(255,0,0);
       strokeWeight(1);
       stroke(0);
-      ellipse(closestX[i],closestY[i],8,8);
+      ellipse(closestX[i],closestY[i],4,4);
       fill(0,255,0);
       ellipse(correctedX[i],correctedY[i],8,8);
+      //here is where you build the servermessage containing the player locations
+      serverMessage += "player"+i+",X"+correctedX[i]+",Y"+correctedY[i];
     }
+    
+    //here is where you send the message
+    //if (myClient.available() > 0) myClient.write(serverMessage);
   }
 }
 
@@ -207,17 +219,6 @@ void mousePressed() {
   // Save color where the mouse is clicked in trackColor variable
   int loc = mouseX + mouseY*video.width;
   trackColor[colorTarget] = video.pixels[loc];
-
-
-  //  println("this is the left edge: "+boundaries[0]);
-  //  println("this is the right edge: "+boundaries[1]);
-  //  println("this is the top edge: "+boundaries[2]);
-  //  println("this is the bottom edge: "+boundaries[3]);
-  //  println();
-  //  println();
-  //  println();
-  //  println();
-
 }
 
 void keyPressed()
