@@ -1,3 +1,4 @@
+import processing.opengl.*;
 import codeanticode.gsvideo.*;
 import processing.net.*; 
 import controlP5.*;
@@ -51,7 +52,7 @@ int[] correctedY = new int[numberOfPlayers];
 float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
-  size(640, 640,P3D);
+  size(640, 640,OPENGL);
   
   //init vectors
   uL = new PVector(0,40,0);
@@ -118,7 +119,8 @@ void draw() {
     background(0);
     video.read();
     video.loadPixels();
-
+    img = video.get();
+    img.updatePixels();
 
     //update vectors
     uL.add(nUL);
@@ -127,7 +129,7 @@ void draw() {
     lR.add(nLR);
 
     beginShape();
-    texture(video);
+    texture(img);
     textureMode(NORMALIZED);
     vertex(uL.x, uL.y, uL.z, 0, 0);
     vertex(uR.x, uR.y, uR.z, 1, 0);
@@ -147,18 +149,17 @@ void draw() {
   rect(0,520, 640,140);
   controlP5.draw();
   
-  img.get();
-  img.loadPixels();
+
   //image(video,0,0);
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
   if(active)
   {
     // Begin loop to walk through every pixel
     for (int x = 0; x < img.width; x ++ ) {
-      for (int y = topMargin; y < bottomMargin; y ++ ) {
-        int loc = x + y*img.width;
+      for (int y = 0; y < img.height; y ++ ) {
+        int loc = y * img.width + x;
         // What is current color
-        color currentColor = img.pixels[loc];
+        color currentColor = img.pixels[0];
         float r1 = red(currentColor);
         float g1 = green(currentColor);
         float b1 = blue(currentColor);
@@ -175,6 +176,7 @@ void draw() {
           // closest color, save current location and current difference
           if (d < worldRecords[i]) 
           {
+            println("hello!"+x);
             worldRecords[i] = d;
             closestX[i] = x;
             closestY[i] = y;
@@ -186,7 +188,7 @@ void draw() {
     //for each player, loop through the areas around the winning pixel to find the center of the area
     for(int i=0;i<numberOfPlayers;i++)
     {
-      int loc = closestX[i] + closestY[i]*width;
+      int loc = closestX[i] + closestY[i]*img.width;
       color winningColor = img.pixels[loc];
       float r1 = red(winningColor);
       float g1 = green(winningColor);
@@ -199,7 +201,7 @@ void draw() {
       //scan from center to left edge
       for(int x = closestX[i]; x > leftCheckLimit; x--)
       {
-        loc = x + closestY[i]*width;
+        loc = x + closestY[i]*img.width;
         color testColor = img.pixels[loc];
         float r2 = red(testColor);
         float g2 = green(testColor);
@@ -213,7 +215,7 @@ void draw() {
       }
 
       //make sure you don't go out of right bounds
-      if (closestX[i]+colorArea > width) rightCheckLimit = width;
+      if (closestX[i]+colorArea > img.width) rightCheckLimit = img.width;
       else rightCheckLimit = closestX[i]+colorArea;
 
       //scan from center to right edge
@@ -238,7 +240,7 @@ void draw() {
       //scan from center to top edge
       for(int y = closestY[i]; y > topCheckLimit; y--)
       {
-        color testColor = img.pixels[closestX[i] + y * width];
+        color testColor = img.pixels[closestX[i] + y * img.width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -257,7 +259,7 @@ void draw() {
       //scan from center to bottom edge
       for(int y = closestY[i]; y < bottomCheckLimit; y++)
       {
-        color testColor = img.pixels[closestX[i] + y * width];
+        color testColor = img.pixels[closestX[i] + y * img.width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -286,8 +288,10 @@ void draw() {
       strokeWeight(1);
       stroke(0);
       ellipse(closestX[i],closestY[i],8,8);
+      
       fill(0,255,0);
       ellipse(correctedX[i],correctedY[i],8,8);
+      
     }
     
     //here is where you send the message
@@ -301,8 +305,9 @@ void mousePressed()
   if(mouseX > 0 && mouseX < 640 && mouseY > 40 && mouseY < 520)
   {
     active = true;
-    int loc = mouseX + mouseY*video.width;
+    int loc = mouseX + mouseY*img.width;
     trackColor[colorTarget] = video.pixels[loc];
+    
   }
 
 }
