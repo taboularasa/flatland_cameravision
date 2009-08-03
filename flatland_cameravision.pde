@@ -118,8 +118,7 @@ void draw() {
     background(0);
     video.read();
     video.loadPixels();
-    img= video.get();
-    img.updatePixels();
+
 
     //update vectors
     uL.add(nUL);
@@ -128,7 +127,7 @@ void draw() {
     lR.add(nLR);
 
     beginShape();
-    texture(img);
+    texture(video);
     textureMode(NORMALIZED);
     vertex(uL.x, uL.y, uL.z, 0, 0);
     vertex(uR.x, uR.y, uR.z, 1, 0);
@@ -148,21 +147,18 @@ void draw() {
   rect(0,520, 640,140);
   controlP5.draw();
   
-  
-  testImg = get(0,40,640,480);
-  testImg.loadPixels();
+  img.get();
+  img.loadPixels();
   //image(video,0,0);
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
   if(active)
   {
     // Begin loop to walk through every pixel
-    for (int x = 0; x < testImg.width; x ++ ) {
-      for (int y = 0; y < testImg.height; y ++ ) {
-        //int loc = x + y*video.width;
+    for (int x = 0; x < img.width; x ++ ) {
+      for (int y = topMargin; y < bottomMargin; y ++ ) {
+        int loc = x + y*img.width;
         // What is current color
-        //color currentColor = testImg.get(x,y);
-        
-        println("this is the color: "+testImg.get(x,y));
+        color currentColor = img.pixels[loc];
         float r1 = red(currentColor);
         float g1 = green(currentColor);
         float b1 = blue(currentColor);
@@ -190,10 +186,8 @@ void draw() {
     //for each player, loop through the areas around the winning pixel to find the center of the area
     for(int i=0;i<numberOfPlayers;i++)
     {
-      //int loc = x + y*video.width;
-      //int loc = closestX[i] + closestY[i]*video.width;
-      //color winningColor = video.pixels[loc];
-      color winningColor = testImg.get(closestX[i],closestY[i]);
+      int loc = closestX[i] + closestY[i]*width;
+      color winningColor = img.pixels[loc];
       float r1 = red(winningColor);
       float g1 = green(winningColor);
       float b1 = blue(winningColor);
@@ -205,8 +199,8 @@ void draw() {
       //scan from center to left edge
       for(int x = closestX[i]; x > leftCheckLimit; x--)
       {
-        //loc = x + closestY[i]*video.width;
-        color testColor = testImg.get(x,closestY[i]);
+        loc = x + closestY[i]*width;
+        color testColor = img.pixels[loc];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -225,8 +219,7 @@ void draw() {
       //scan from center to right edge
       for(int x = closestX[i]; x < rightCheckLimit; x++)
       {
-        //color testColor = video.pixels[x + closestY[i]*video.width];
-        color testColor = testImg.get(x,closestY[i]);
+        color testColor = img.pixels[x + closestY[i]*width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -239,14 +232,13 @@ void draw() {
       }
 
       //make sure you don't go out of top bounds
-      if (closestY[i]-colorArea < 0) topCheckLimit = 0;
+      if (closestY[i]-colorArea < topMargin) topCheckLimit = topMargin;
       else topCheckLimit = closestY[i]-colorArea;
       
       //scan from center to top edge
       for(int y = closestY[i]; y > topCheckLimit; y--)
       {
-        //color testColor = video.pixels[closestX[i] + y * video.width];
-        color testColor = testImg.get(closestX[i], y);
+        color testColor = img.pixels[closestX[i] + y * width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -259,14 +251,13 @@ void draw() {
       }
       
       //make sure you don't go out of  bottom bounds
-      if (closestY[i]+colorArea > height) bottomCheckLimit = height;
+      if (closestY[i]+colorArea > bottomMargin) bottomCheckLimit = bottomMargin;
       else bottomCheckLimit = closestY[i]+colorArea;
       
       //scan from center to bottom edge
       for(int y = closestY[i]; y < bottomCheckLimit; y++)
       {
-        //color testColor = video.pixels[closestX[i] + y * video.width];
-        color testColor = testImg.get(closestX[i],y);
+        color testColor = img.pixels[closestX[i] + y * width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -294,11 +285,9 @@ void draw() {
       fill(255,0,0);
       strokeWeight(1);
       stroke(0);
-      ellipse(closestX[i],closestY[i]+40,4,4);
+      ellipse(closestX[i],closestY[i],8,8);
       fill(0,255,0);
-      ellipse(correctedX[i],correctedY[i]+40,8,8);
-      //here is where you build the servermessage containing the player locations
-      serverMessage += "player"+i+",X"+correctedX[i]+",Y"+correctedY[i];
+      ellipse(correctedX[i],correctedY[i],8,8);
     }
     
     //here is where you send the message
