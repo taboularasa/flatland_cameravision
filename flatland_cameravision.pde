@@ -1,11 +1,16 @@
-// camera vision from:
-// Learning Processing
-// Daniel Shiffman
-// http://www.learningprocessing.com
-
-
 import codeanticode.gsvideo.*;
 import processing.net.*; 
+import controlP5.*;
+
+//stuff for GUI
+ControlP5 controlP5;
+int colorTarget;
+
+//stuff for vertex transform
+int sheerVertex = 0;
+PImage img;
+PVector uL, uR, lL, lR;
+PVector nUL, nUR, nLL, nLR;
 
 //stuff for TCP
 Client myClient;
@@ -24,9 +29,9 @@ int bottomCheckLimit;
 //this is so we don't track things until we want to
 boolean active = false;
 
-int numberOfPlayers = 1;
-//keyboard stuff
-int colorTarget;
+int numberOfPlayers = 6;
+
+
 
 // Variable for capture device
 GSCapture video;
@@ -44,9 +49,49 @@ int[] correctedY = new int[numberOfPlayers];
 float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
-  size(640,480);
-  video = new GSCapture(this,width,height,15);
+  size(640, 640,P3D);
+  
+  //init vectors
+  uL = new PVector(0,40,0);
+  uR = new PVector(640,40,0);
+  lR = new PVector(640,520,0);
+  lL = new PVector(0,520,0);
+
+  //update vectors
+  nUL  = new PVector(0,0,0);
+  nUR  = new PVector(0,0,0);
+  nLR  = new PVector(0,0,0);
+  nLL  = new PVector(0,0,0);
+  
+  //stuff for video
+  video = new GSCapture(this, 640, 480, 30);
+  img = createImage(video.width, video.height, RGB);
+  
+  //stuff for networking
   //myClient = new Client(this, "192.168.1.100", 51007);
+  
+  //stuff for GUI
+  controlP5 = new ControlP5(this);
+  Slider s = controlP5.addSlider("SX",-5,5,0,100,562,300,10);
+  s = controlP5.addSlider("SY",-5,5,0,100,550,300,10);
+  s = controlP5.addSlider("SZX",-5,5,0,100,574,300,10);
+  s = controlP5.addSlider("SZY",-5,5,0,100,586,300,10);
+  Radio sV = controlP5.addRadio("sheerVertex",20,550);
+  sV.add("lock-all",0);
+  sV.add("up-right",1);
+  sV.add("low-left",2);
+  sV.add("low-right",3);
+  sV.add("up-left",4);
+  Radio pC = controlP5.addRadio("colorTarget",20,550);
+  pC.add("red",0);
+  pC.add("green",1);
+  pC.add("blue",2);
+  pC.add("yellow",3);
+  pC.add("orange",4);
+  pC.add("purple",5);
+  controlP5.controller("colorTarget").moveTo("tracking");
+  
+  //stuff for color tracking
   for(int i=0;i<numberOfPlayers;i++)
   {
     worldRecords[i]=500;
@@ -55,18 +100,52 @@ void setup() {
     closestY[i] = height/2;
   } 
 
-  smooth();
+
 }
 
 void draw() {
+  
   //reset server message
   serverMessage = "";
+  
   // Capture and display the video
+  hint(ENABLE_DEPTH_TEST);
   if (video.available()) {
+    background(0);
     video.read();
+    video.loadPixels();
+    img= video.get();
+    img.updatePixels();
+
+    //update vectors
+    uL.add(nUL);
+    uR.add(nUR);
+    lL.add(nLL);
+    lR.add(nLR);
+
+    beginShape();
+    texture(img);
+    textureMode(NORMALIZED);
+    vertex(uL.x, uL.y, uL.z, 0, 0);
+    vertex(uR.x, uR.y, uR.z, 1, 0);
+    vertex(lR.x, lR.y, lR.z, 1, 1);
+    vertex(lL.x, lL.y, lL.z, 0, 1);
+    endShape();
+    
+    //reset update vectors
+    nUL.set(0,0,0);
+    nUR.set(0,0,0);
+    nLR.set(0,0,0);
+    nLL.set(0,0,0);
   }
-  video.loadPixels();
-  image(video,0,0);
+  hint(DISABLE_DEPTH_TEST);
+  fill(0);
+  rect(0,0,640,40);
+  rect(0,520, 640,140);
+  controlP5.draw();
+  
+  //video.loadPixels();
+  //image(video,0,0);
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
   if(active)
   {
@@ -215,21 +294,127 @@ void draw() {
   }
 }
 
-void mousePressed() {
+void mousePressed() 
+{
   // Save color where the mouse is clicked in trackColor variable
-  int loc = mouseX + mouseY*video.width;
-  trackColor[colorTarget] = video.pixels[loc];
+  if(mouseX > 0 && mouseX < 640 && mouseY > 40 && mouseY < 520)
+  {
+    active = true;
+    int loc = mouseX + mouseY*video.width;
+    trackColor[colorTarget] = video.pixels[loc];
+  }
+
 }
 
 void keyPressed()
 {
   active = true;
   colorTarget = int(key)-49;
+  println(colorTarget);
 }
 
 
 
 
+void SX(float x)
+{
+  switch(sheerVertex) 
+  {
+    case(0):
+    nUL.x = x;
+    nUR.x = x;
+    nLL.x = (-1*x);
+    nLR.x = (-1*x);
+    break;  
+    case(1):
+    nUR.x = x;
+    break;  
+    case(2):
+    nLL.x = x;
+    break;  
+    case(3):
+    nLR.x = x;
+    break;
+    case(4):
+    nUL.x = x;
+    break;    
+  }
+}
+
+void SY(float y)
+{
+  switch(sheerVertex) 
+  {
+    case(0):
+    nUL.y = y;
+    nLL.y = y;
+    nUR.y = (-1*y);
+    nLR.y = (-1*y);
+    break;  
+    case(1):
+    nUR.y = y;
+    break;  
+    case(2):
+    nLL.y = y;
+    break;  
+    case(3):
+    nLR.y = y;
+    break;
+    case(4):
+    nUL.y = y;
+    break;    
+  }
+}
+
+void SZX(float z)
+{
+  switch(sheerVertex) 
+  {
+    case(0):
+    nUL.z = z;
+    nLL.z = z;
+    nUR.z = (-1*z);
+    nLR.z = (-1*z);
+    break;  
+    case(1):
+    nUR.z = z;
+    break;  
+    case(2):
+    nLL.z = z;
+    break;  
+    case(3):
+    nLR.z = z;
+    break;
+    case(4):
+    nUL.z = z; 
+    break;    
+  }
+}
+
+void SZY(float z)
+{
+  switch(sheerVertex) 
+  {
+    case(0):
+    nUL.z = z;
+    nUR.z = z;
+    nLL.z = (-1*z);
+    nLR.z = (-1*z);
+    break;  
+    case(1):
+    nUR.z = z;
+    break;  
+    case(2):
+    nLL.z = z;
+    break;  
+    case(3):
+    nLR.z = z;
+    break;
+    case(4):
+    nUL.z = z; 
+    break;    
+  }
+}
 
 
 
