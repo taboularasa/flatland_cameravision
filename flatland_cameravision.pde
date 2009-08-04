@@ -87,14 +87,15 @@ void setup() {
   sV.add("low-left",2);
   sV.add("low-right",3);
   sV.add("up-left",4);
-  Radio pC = controlP5.addRadio("colorTarget",20,550);
+  Radio pC = controlP5.addRadio("radioColor",300,550);
+  pC.deactivateAll();
   pC.add("red",0);
   pC.add("green",1);
   pC.add("blue",2);
   pC.add("yellow",3);
   pC.add("orange",4);
   pC.add("purple",5);
-  controlP5.controller("colorTarget").moveTo("tracking");
+  
 
   //stuff for color tracking
   for(int i=0;i<numberOfPlayers;i++)
@@ -326,6 +327,7 @@ void keyPressed()
 {
   active = true;
   colorTarget = int(key)-49;
+  controlP5.controller("radioColor").setValue(colorTarget);
   println(colorTarget);
 }
 
