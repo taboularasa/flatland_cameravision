@@ -53,7 +53,7 @@ float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
   size(640, 640,OPENGL);
-  
+
   //init vectors
   uL = new PVector(0,40,0);
   uR = new PVector(640,40,0);
@@ -65,22 +65,22 @@ void setup() {
   nUR  = new PVector(0,0,0);
   nLR  = new PVector(0,0,0);
   nLL  = new PVector(0,0,0);
-  
+
   //stuff for video
   video = new GSCapture(this, 640, 480, 30);
   img = createImage(video.width, video.height, RGB);
-  testImg = createImage(video.width, video.height, RGB);
-  
-  
+  // testImg = createImage(video.width, video.height, RGB);
+
+
   //stuff for networking
   //myClient = new Client(this, "192.168.1.100", 51007);
-  
+
   //stuff for GUI
   controlP5 = new ControlP5(this);
-  Slider s = controlP5.addSlider("SX",-5,5,0,100,562,300,10);
-  s = controlP5.addSlider("SY",-5,5,0,100,550,300,10);
-  s = controlP5.addSlider("SZX",-5,5,0,100,574,300,10);
-  s = controlP5.addSlider("SZY",-5,5,0,100,586,300,10);
+  Slider s = controlP5.addSlider("SX",-50,50,0,100,562,100,10);
+  s = controlP5.addSlider("SY",-50,50,0,100,550,100,10);
+  s = controlP5.addSlider("SZX",-50,50,0,100,574,100,10);
+  s = controlP5.addSlider("SZY",-50,50,0,100,586,100,10);
   Radio sV = controlP5.addRadio("sheerVertex",20,550);
   sV.add("lock-all",0);
   sV.add("up-right",1);
@@ -95,7 +95,7 @@ void setup() {
   pC.add("orange",4);
   pC.add("purple",5);
   controlP5.controller("colorTarget").moveTo("tracking");
-  
+
   //stuff for color tracking
   for(int i=0;i<numberOfPlayers;i++)
   {
@@ -109,11 +109,14 @@ void setup() {
 }
 
 void draw() {
-  
+
   //reset server message
   serverMessage = "";
-  
-  // Capture and display the video
+
+  ///////////////////////////////
+  // THIS IS WHERE WE CAPTURE AND CORRECT THE IMAGE
+  ////////////////////////////////
+
   hint(ENABLE_DEPTH_TEST);
   if (video.available()) {
     background(0);
@@ -136,7 +139,7 @@ void draw() {
     vertex(lR.x, lR.y, lR.z, 1, 1);
     vertex(lL.x, lL.y, lL.z, 0, 1);
     endShape();
-    
+
     //reset update vectors
     nUL.set(0,0,0);
     nUR.set(0,0,0);
@@ -144,22 +147,32 @@ void draw() {
     nLL.set(0,0,0);
   }
   hint(DISABLE_DEPTH_TEST);
+
   fill(0);
   rect(0,0,640,40);
   rect(0,520, 640,140);
-  controlP5.draw();
   
+  testImg = get();
+  //testImg.loadPixels();
+  background(255);
+  image(testImg,0,0);
+  
+  controlP5.draw();
 
-  //image(video,0,0);
+  ////////////////////////////
+  //THIS IS WHERE WE DO THE TRACKING
+  ///////////////////////////
+
+
   for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
   if(active)
   {
     // Begin loop to walk through every pixel
-    for (int x = 0; x < img.width; x ++ ) {
-      for (int y = 0; y < img.height; y ++ ) {
-        int loc = y * img.width + x;
+    for (int x = 0; x < testImg.width; x ++ ) {
+      for (int y = 0; y < testImg.height; y ++ ) {
+        int loc = x + y*testImg.width;
         // What is current color
-        color currentColor = img.pixels[0];
+        color currentColor = testImg.pixels[loc];
         float r1 = red(currentColor);
         float g1 = green(currentColor);
         float b1 = blue(currentColor);
@@ -176,7 +189,6 @@ void draw() {
           // closest color, save current location and current difference
           if (d < worldRecords[i]) 
           {
-            println("hello!"+x);
             worldRecords[i] = d;
             closestX[i] = x;
             closestY[i] = y;
@@ -188,8 +200,9 @@ void draw() {
     //for each player, loop through the areas around the winning pixel to find the center of the area
     for(int i=0;i<numberOfPlayers;i++)
     {
-      int loc = closestX[i] + closestY[i]*img.width;
-      color winningColor = img.pixels[loc];
+      //int loc = x + y*testImg.width;
+      int loc = closestX[i] + closestY[i]*testImg.width;
+      color winningColor = testImg.pixels[loc];
       float r1 = red(winningColor);
       float g1 = green(winningColor);
       float b1 = blue(winningColor);
@@ -201,8 +214,8 @@ void draw() {
       //scan from center to left edge
       for(int x = closestX[i]; x > leftCheckLimit; x--)
       {
-        loc = x + closestY[i]*img.width;
-        color testColor = img.pixels[loc];
+        loc = x + closestY[i]*testImg.width;
+        color testColor = testImg.pixels[loc];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -215,13 +228,13 @@ void draw() {
       }
 
       //make sure you don't go out of right bounds
-      if (closestX[i]+colorArea > img.width) rightCheckLimit = img.width;
+      if (closestX[i]+colorArea > width) rightCheckLimit = width;
       else rightCheckLimit = closestX[i]+colorArea;
 
       //scan from center to right edge
       for(int x = closestX[i]; x < rightCheckLimit; x++)
       {
-        color testColor = img.pixels[x + closestY[i]*width];
+        color testColor = testImg.pixels[x + closestY[i]*testImg.width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -234,13 +247,13 @@ void draw() {
       }
 
       //make sure you don't go out of top bounds
-      if (closestY[i]-colorArea < topMargin) topCheckLimit = topMargin;
+      if (closestY[i]-colorArea < 0) topCheckLimit = 0;
       else topCheckLimit = closestY[i]-colorArea;
-      
+
       //scan from center to top edge
       for(int y = closestY[i]; y > topCheckLimit; y--)
       {
-        color testColor = img.pixels[closestX[i] + y * img.width];
+        color testColor = testImg.pixels[closestX[i] + y * testImg.width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -251,15 +264,15 @@ void draw() {
           break;
         }
       }
-      
+
       //make sure you don't go out of  bottom bounds
-      if (closestY[i]+colorArea > bottomMargin) bottomCheckLimit = bottomMargin;
+      if (closestY[i]+colorArea > height) bottomCheckLimit = height;
       else bottomCheckLimit = closestY[i]+colorArea;
-      
+
       //scan from center to bottom edge
       for(int y = closestY[i]; y < bottomCheckLimit; y++)
       {
-        color testColor = img.pixels[closestX[i] + y * img.width];
+        color testColor = testImg.pixels[closestX[i] + y * testImg.width];
         float r2 = red(testColor);
         float g2 = green(testColor);
         float b2 = blue(testColor);
@@ -288,15 +301,12 @@ void draw() {
       strokeWeight(1);
       stroke(0);
       ellipse(closestX[i],closestY[i],8,8);
-      
       fill(0,255,0);
       ellipse(correctedX[i],correctedY[i],8,8);
-      
     }
-    
-    //here is where you send the message
-    //if (myClient.available() > 0) myClient.write(serverMessage);
   }
+
+
 }
 
 void mousePressed() 
@@ -306,8 +316,8 @@ void mousePressed()
   {
     active = true;
     int loc = mouseX + mouseY*img.width;
-    trackColor[colorTarget] = video.pixels[loc];
-    
+    trackColor[colorTarget] = testImg.pixels[loc];
+
   }
 
 }
@@ -421,6 +431,7 @@ void SZY(float z)
     break;    
   }
 }
+
 
 
 
