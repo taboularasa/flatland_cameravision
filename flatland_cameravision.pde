@@ -52,13 +52,13 @@ int[] correctedY = new int[numberOfPlayers];
 float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
-  size(640, 640,OPENGL);
-
+  size(640, 600,P3D);
+  frameRate(60);
   //init vectors
-  uL = new PVector(0,40,0);
-  uR = new PVector(640,40,0);
-  lR = new PVector(640,520,0);
-  lL = new PVector(0,520,0);
+  uL = new PVector(0,0,0);
+  uR = new PVector(640,0,0);
+  lR = new PVector(640,480,0);
+  lL = new PVector(0,480,0);
 
   //update vectors
   nUL  = new PVector(0,0,0);
@@ -77,17 +77,17 @@ void setup() {
 
   //stuff for GUI
   controlP5 = new ControlP5(this);
-  Slider s = controlP5.addSlider("SX",-50,50,0,100,562,100,10);
-  s = controlP5.addSlider("SY",-50,50,0,100,550,100,10);
-  s = controlP5.addSlider("SZX",-50,50,0,100,574,100,10);
-  s = controlP5.addSlider("SZY",-50,50,0,100,586,100,10);
-  Radio sV = controlP5.addRadio("sheerVertex",20,550);
+  Slider s = controlP5.addSlider("SX",-50,50,0,100,500,100,10);
+  s = controlP5.addSlider("SY",-50,50,0,100,512,100,10);
+  s = controlP5.addSlider("SZX",-50,50,0,100,524,100,10);
+  s = controlP5.addSlider("SZY",-50,50,0,100,536,100,10);
+  Radio sV = controlP5.addRadio("sheerVertex",20,500);
   sV.add("lock-all",0);
   sV.add("up-right",1);
   sV.add("low-left",2);
   sV.add("low-right",3);
   sV.add("up-left",4);
-  Radio pC = controlP5.addRadio("radioColor",300,550);
+  Radio pC = controlP5.addRadio("radioColor",300,500);
   pC.deactivateAll();
   pC.add("red",0);
   pC.add("green",1);
@@ -110,7 +110,7 @@ void setup() {
 }
 
 void draw() {
-
+  println(frameRate);
   //reset server message
   serverMessage = "";
 
@@ -150,8 +150,7 @@ void draw() {
   hint(DISABLE_DEPTH_TEST);
 
   fill(0);
-  rect(0,0,640,40);
-  rect(0,520, 640,140);
+  rect(0,480, 640,180);
   
   testImg = get();
   //testImg.loadPixels();
@@ -313,7 +312,7 @@ void draw() {
 void mousePressed() 
 {
   // Save color where the mouse is clicked in trackColor variable
-  if(mouseX > 0 && mouseX < 640 && mouseY > 40 && mouseY < 520)
+  if(mouseX > 0 && mouseX < 640 && mouseY > 0 && mouseY < 480)
   {
     active = true;
     int loc = mouseX + mouseY*img.width;
