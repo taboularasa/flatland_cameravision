@@ -1,5 +1,6 @@
 import processing.opengl.*;
 import codeanticode.gsvideo.*;
+import codeanticode.glgraphics.*;
 import processing.net.*; 
 import controlP5.*;
 
@@ -52,7 +53,7 @@ int[] correctedY = new int[numberOfPlayers];
 float[] worldRecords = new float[numberOfPlayers];
 
 void setup() {
-  size(640, 600,P3D);
+  size(640, 600,GLConstants.GLGRAPHICS);
   frameRate(60);
   //init vectors
   uL = new PVector(0,0,0);
