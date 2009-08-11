@@ -207,9 +207,9 @@ void draw() {
   model.render();
   cam.done();
   renderer.endGL();
-  
+  hint(DISABLE_DEPTH_TEST);
   fill(0);
-  //rect(0,480, 640,180);
+  rect(0,480, 640,180);
   
   testImg = get();
   //testImg.loadPixels();
