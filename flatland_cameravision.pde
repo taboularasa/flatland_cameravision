@@ -37,8 +37,18 @@ int numberOfPlayers = 1;
 
 
 
-// Variable for capture device
+// Variable for GSVideo
 GSCapture video;
+
+//stuff for GLGraphics
+GLCamera cam;
+GLModel model;
+GLTexture tex;
+float[] coords;
+float[] colors;
+float[] texcoords;
+int numPoints = 4;
+float distance = 26400;
 
 // A variable for the color we are searching for.
 color[] trackColor = new color[numberOfPlayers]; 
@@ -70,7 +80,55 @@ void setup() {
   //stuff for video
   video = new GSCapture(this, 640, 480, 30);
   img = createImage(video.width, video.height, RGB);
-  // testImg = createImage(video.width, video.height, RGB);
+  
+  //stuff for GLGraphics
+  model = new GLModel(this, numPoints, QUADS, GLModel.DYNAMIC);
+  model.initColors();
+  tex = new GLTexture(this, "milan.jpg");
+  cam = new GLCamera(this, 0, 0, distance, width/2, height/2, 0);
+  coords = new float[16];
+  colors = new float[4 * numPoints];
+  texcoords = new float[8];
+
+  //corner 1
+  coords[0] = 0;
+  coords[1] = 0;
+  coords[2] = 0;
+
+  texcoords[0] = 0;
+  texcoords[1] = 1;
+
+  //corner 2
+  coords[4] = 640;
+  coords[5] = 0;
+  coords[6] = 0;
+
+  texcoords[2] = 1;
+  texcoords[3] = 1;
+
+  //corner 3
+  coords[8] = 640;
+  coords[9] = 480;
+  coords[10] = 0;
+
+  texcoords[4] = 1;
+  texcoords[5] = 0;
+
+  //corner 4
+  coords[12] = 0;
+  coords[13] = 480;
+  coords[14] = 0;
+
+  texcoords[6] = 0;
+  texcoords[7] = 0;
+
+  for (int i = 0; i < colors.length; i++) colors[i] = 1;
+
+  model.updateVertices(coords);
+  model.updateColors(colors);
+  model.initTexures(1);
+  model.setTexture(0, tex);
+  
 
 
   //stuff for networking
@@ -115,17 +173,15 @@ void draw() {
   //reset server message
   serverMessage = "";
 
+  
   ///////////////////////////////
   // THIS IS WHERE WE CAPTURE AND CORRECT THE IMAGE
   ////////////////////////////////
 
   hint(ENABLE_DEPTH_TEST);
+  GLGraphics renderer = (GLGraphics)g;
   if (video.available()) {
     background(0);
-    video.read();
-    video.loadPixels();
-    img = video.get();
-    img.updatePixels();
 
     //update vectors
     uL.add(nUL);
@@ -133,14 +189,8 @@ void draw() {
     lL.add(nLL);
     lR.add(nLR);
 
-    beginShape();
-    texture(img);
-    textureMode(NORMALIZED);
-    vertex(uL.x, uL.y, uL.z, 0, 0);
-    vertex(uR.x, uR.y, uR.z, 1, 0);
-    vertex(lR.x, lR.y, lR.z, 1, 1);
-    vertex(lL.x, lL.y, lL.z, 0, 1);
-    endShape();
+    video.read();
+    tex.putPixelsIntoTexture(video);
 
     //reset update vectors
     nUL.set(0,0,0);
@@ -148,15 +198,23 @@ void draw() {
     nLR.set(0,0,0);
     nLL.set(0,0,0);
   }
-  hint(DISABLE_DEPTH_TEST);
 
+  model.updateVertices(coords);
+  model.updateTexCoords(0, texcoords);
+
+  cam.feed();
+  cam.clear(0);
+  model.render();
+  cam.done();
+  renderer.endGL();
+  
   fill(0);
-  rect(0,480, 640,180);
+  //rect(0,480, 640,180);
   
   testImg = get();
   //testImg.loadPixels();
-  background(255);
-  image(testImg,0,0);
+  //background(255);
+  //image(testImg,0,0);
   
   controlP5.draw();
 
