@@ -49,7 +49,8 @@ float[] coords;
 float[] colors;
 float[] texcoords;
 int numPoints = 4;
-float distance = 26400;
+float distance = 32800;
+float camRoll = 0;
 
 // A variable for the color we are searching for.
 color[] trackColor = new color[numberOfPlayers]; 
@@ -86,7 +87,7 @@ void setup() {
   model = new GLModel(this, numPoints, QUADS, GLModel.DYNAMIC);
   model.initColors();
   tex = new GLTexture(this, "milan.jpg");
-  cam = new GLCamera(this, 0, 0, distance, width/2, height/2, 0);
+  cam = new GLCamera(this, video.width/2, video.height/2, distance, video.width/2, video.height/2-59, 0);
   coords = new float[16];
   colors = new float[4 * numPoints];
   texcoords = new float[8];
@@ -204,8 +205,9 @@ void draw() {
   model.updateVertices(coords);
   model.updateTexCoords(0, texcoords);
 
-  cam.jump(0,0,distance);
-
+  cam.jump(video.width/2,video.height/2,distance);
+  cam.roll(camRoll);
+  camRoll=0;
   cam.feed();
   cam.clear(0);
   model.render();
@@ -213,7 +215,6 @@ void draw() {
   renderer.endGL();
   hint(DISABLE_DEPTH_TEST);
   fill(0);
-  rect(0,0, 640,180);
   rect(0,480, 640,180);
 
   testImg = get();
@@ -391,7 +392,7 @@ void keyPressed()
   active = true;
   colorTarget = int(key)-49;
   controlP5.controller("radioColor").setValue(colorTarget);
-  println(colorTarget);
+
 }
 
 
@@ -407,20 +408,16 @@ void SY(float y)
   gui.SY(y);
 }
 
-void SZX(float z)
-{
-  gui.SZX(z);
-}
-
-void SZY(float z)
-{
-  gui.SZY(z);
-}
-
 void DIST(float d)
 {
   distance = d;
 }
+
+void ROLL(float r)
+{
+  camRoll = radians(r);
+}
+
 
 
 
