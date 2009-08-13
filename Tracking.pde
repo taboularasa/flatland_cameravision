@@ -45,7 +45,11 @@ class Tracking
     for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
     if(active)
     {
+      ////////////////////////////////////////
       // Begin loop to walk through every pixel
+      ////////////////////////////////////////
+      //need to change this to look throgh just the neighborhood of the last location of each player
+      
       for (int x = 0; x < testImg.width; x ++ ) {
         for (int y = 0; y < testImg.height; y ++ ) {
           int loc = x + y*testImg.width;
@@ -75,7 +79,12 @@ class Tracking
         }
       }
 
-      //for each player, loop through the areas around the winning pixel to find the center of the area
+      //////////////////////////////////////
+      //now that we have the a location for each player
+      //find the bounding box of the player
+      //and put the players position in the center of the box
+      /////////////////////////////////////
+      
       for(int i=0;i<numberOfPlayers;i++)
       {
         //int loc = x + y*testImg.width;
@@ -162,7 +171,6 @@ class Tracking
           }
         }
 
-
         //the new horizontal center is the difference between the right and left edge divided by 2
         correctedX[i] = boundaries[0]+((boundaries[1]-boundaries[0])/2);
 
@@ -171,7 +179,9 @@ class Tracking
       }
 
 
-
+      /////////////////////////////////
+      //now draw the players location
+      //////////////////////////////////
 
       for(int i=0;i<numberOfPlayers;i++)
       {
