@@ -7,6 +7,7 @@ import controlP5.*;
 //stuff for GUI
 ControlP5 controlP5;
 int colorTarget;
+GUI gui;
 
 //stuff for vertex transform
 int topMargin = 40;
@@ -80,7 +81,7 @@ void setup() {
   //stuff for video
   video = new GSCapture(this, 640, 480, 30);
   img = createImage(video.width, video.height, RGB);
-  
+
   //stuff for GLGraphics
   model = new GLModel(this, numPoints, QUADS, GLModel.DYNAMIC);
   model.initColors();
@@ -91,33 +92,33 @@ void setup() {
   texcoords = new float[8];
 
   //corner 1
-  coords[0] = 0;
-  coords[1] = 0;
-  coords[2] = 0;
+  coords[0] = uL.x;
+  coords[1] = uL.y;
+  coords[2] = uL.z;
 
   texcoords[0] = 0;
   texcoords[1] = 1;
 
   //corner 2
-  coords[4] = 640;
-  coords[5] = 0;
-  coords[6] = 0;
+  coords[4] = uR.x;
+  coords[5] = uR.y;
+  coords[6] = uR.z;
 
   texcoords[2] = 1;
   texcoords[3] = 1;
 
   //corner 3
-  coords[8] = 640;
-  coords[9] = 480;
-  coords[10] = 0;
+  coords[8] = lR.x;
+  coords[9] = lR.y;
+  coords[10] = lR.z;
 
   texcoords[4] = 1;
   texcoords[5] = 0;
 
   //corner 4
-  coords[12] = 0;
-  coords[13] = 480;
-  coords[14] = 0;
+  coords[12] = lL.x;
+  coords[13] = lL.y;
+  coords[14] = lL.z;
 
   texcoords[6] = 0;
   texcoords[7] = 0;
@@ -128,33 +129,15 @@ void setup() {
   model.updateColors(colors);
   model.initTexures(1);
   model.setTexture(0, tex);
-  
+
 
 
   //stuff for networking
   //myClient = new Client(this, "192.168.1.100", 51007);
 
   //stuff for GUI
-  controlP5 = new ControlP5(this);
-  Slider s = controlP5.addSlider("SX",-50,50,0,100,500,100,10);
-  s = controlP5.addSlider("SY",-50,50,0,100,512,100,10);
-  s = controlP5.addSlider("SZX",-50,50,0,100,524,100,10);
-  s = controlP5.addSlider("SZY",-50,50,0,100,536,100,10);
-  Radio sV = controlP5.addRadio("sheerVertex",20,500);
-  sV.add("lock-all",0);
-  sV.add("up-right",1);
-  sV.add("low-left",2);
-  sV.add("low-right",3);
-  sV.add("up-left",4);
-  Radio pC = controlP5.addRadio("radioColor",300,500);
-  pC.deactivateAll();
-  pC.add("red",0);
-  pC.add("green",1);
-  pC.add("blue",2);
-  pC.add("yellow",3);
-  pC.add("orange",4);
-  pC.add("purple",5);
-  
+  gui = new GUI(this);
+
 
   //stuff for color tracking
   for(int i=0;i<numberOfPlayers;i++)
@@ -169,11 +152,13 @@ void setup() {
 }
 
 void draw() {
+
+  gui.sheerVertex = sheerVertex;
   println(frameRate);
   //reset server message
-  serverMessage = "";
+  //serverMessage = "";
 
-  
+
   ///////////////////////////////
   // THIS IS WHERE WE CAPTURE AND CORRECT THE IMAGE
   ////////////////////////////////
@@ -189,6 +174,23 @@ void draw() {
     lL.add(nLL);
     lR.add(nLR);
 
+    //corner 1
+    coords[0] = uL.x;
+    coords[1] = uL.y;
+    coords[2] = uL.z;
+    //corner 2
+    coords[4] = uR.x;
+    coords[5] = uR.y;
+    coords[6] = uR.z;
+    //corner 3
+    coords[8] = lR.x;
+    coords[9] = lR.y;
+    coords[10] = lR.z;
+    //corner 4
+    coords[12] = lL.x;
+    coords[13] = lL.y;
+    coords[14] = lL.z;
+
     video.read();
     tex.putPixelsIntoTexture(video);
 
@@ -202,6 +204,8 @@ void draw() {
   model.updateVertices(coords);
   model.updateTexCoords(0, texcoords);
 
+  cam.jump(0,0,distance);
+
   cam.feed();
   cam.clear(0);
   model.render();
@@ -209,13 +213,14 @@ void draw() {
   renderer.endGL();
   hint(DISABLE_DEPTH_TEST);
   fill(0);
+  rect(0,0, 640,180);
   rect(0,480, 640,180);
-  
+
   testImg = get();
   //testImg.loadPixels();
   //background(255);
   //image(testImg,0,0);
-  
+
   controlP5.draw();
 
   ////////////////////////////
@@ -394,107 +399,28 @@ void keyPressed()
 
 void SX(float x)
 {
-  switch(sheerVertex) 
-  {
-    case(0):
-    nUL.x = x;
-    nUR.x = x;
-    nLL.x = (-1*x);
-    nLR.x = (-1*x);
-    break;  
-    case(1):
-    nUR.x = x;
-    break;  
-    case(2):
-    nLL.x = x;
-    break;  
-    case(3):
-    nLR.x = x;
-    break;
-    case(4):
-    nUL.x = x;
-    break;    
-  }
+  gui.SX(x);
 }
 
 void SY(float y)
 {
-  switch(sheerVertex) 
-  {
-    case(0):
-    nUL.y = y;
-    nLL.y = y;
-    nUR.y = (-1*y);
-    nLR.y = (-1*y);
-    break;  
-    case(1):
-    nUR.y = y;
-    break;  
-    case(2):
-    nLL.y = y;
-    break;  
-    case(3):
-    nLR.y = y;
-    break;
-    case(4):
-    nUL.y = y;
-    break;    
-  }
+  gui.SY(y);
 }
 
 void SZX(float z)
 {
-  switch(sheerVertex) 
-  {
-    case(0):
-    nUL.z = z;
-    nLL.z = z;
-    nUR.z = (-1*z);
-    nLR.z = (-1*z);
-    break;  
-    case(1):
-    nUR.z = z;
-    break;  
-    case(2):
-    nLL.z = z;
-    break;  
-    case(3):
-    nLR.z = z;
-    break;
-    case(4):
-    nUL.z = z; 
-    break;    
-  }
+  gui.SZX(z);
 }
 
 void SZY(float z)
 {
-  switch(sheerVertex) 
-  {
-    case(0):
-    nUL.z = z;
-    nUR.z = z;
-    nLL.z = (-1*z);
-    nLR.z = (-1*z);
-    break;  
-    case(1):
-    nUR.z = z;
-    break;  
-    case(2):
-    nLL.z = z;
-    break;  
-    case(3):
-    nLR.z = z;
-    break;
-    case(4):
-    nUL.z = z; 
-    break;    
-  }
+  gui.SZY(z);
 }
 
-
-
-
+void DIST(float d)
+{
+  distance = d;
+}
 
 
 
