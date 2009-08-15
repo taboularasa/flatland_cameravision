@@ -21,9 +21,6 @@ Client myClient;
 String serverMessage = "";
 
 
-
-
-
 Graphics graphics;
 Gui gui;
 Tracking tracking;
@@ -41,9 +38,6 @@ float[] texcoords;
 int numPoints = 4;
 float distance = 32800;
 float camRoll = 0;
-
-
-
 
 
 void setup() {
@@ -67,23 +61,28 @@ void setup() {
 void draw() {
 
   //println(frameRate);
-
+  
+  //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);
   GLGraphics renderer = (GLGraphics)g;
   graphics.update();
   renderer.endGL();
   hint(DISABLE_DEPTH_TEST);
 
+  //mask the bootom edge
   fill(0);
   rect(0,480, 640,180);
 
+  //make an image of whats on the screen
   testImg = get();
   testImg.loadPixels();
-
-
+  //send it to the tracking object
+  tracking.update(testImg);
+  
+  //draw the GUI
   controlP5.draw();
 
-  tracking.update();
+
 
 }
 

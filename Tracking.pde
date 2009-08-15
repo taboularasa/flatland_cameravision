@@ -1,196 +1,122 @@
 class Tracking
 {
+  //do we really need to keep track of how many players? or can we just do that automatically by changing the size of the player array?
   int numberOfPlayers = 1;
-  int colorTarget;
 
-  //stuff for finding boundary of colors
-  int colorArea = 20;
-  int[] boundaries = new int[4];
-  int trackingThreshold = 20;
-  int leftCheckLimit;
-  int rightCheckLimit;
-  int topCheckLimit;
-  int bottomCheckLimit;
+  //this is which players color to set
+  int setPlayerNumber;
 
-  // Before we begin searching, the "world record" for closest color is set to a high number that is easy for the first pixel to beat.
-  float[] worldRecords = new float[numberOfPlayers];
+  PVector testColor;
 
-  // A variable for the color we are searching for.
-  color[] trackColor = new color[numberOfPlayers]; 
+  //this holds a list of player objects
+  ArrayList players;
 
-  // XY coordinate of closest color
-  int[] closestX = new int[numberOfPlayers];
-  int[] closestY = new int[numberOfPlayers];
-  int[] correctedX = new int[numberOfPlayers];
-  int[] correctedY = new int[numberOfPlayers];
-
-  //this is so we don't track things until we want to
-  boolean active = false;
-
+  //the sketch
+  PApplet parent;
 
 
   Tracking(PApplet app)
   {
-    for(int i=0;i<numberOfPlayers;i++)
-    {
-      worldRecords[i]=500;
-      trackColor[i] = color(255);
-      closestX[i] = width/2;
-      closestY[i] = height/2;
-    } 
+    parent = app;
+    players = new ArrayList();  // Create an empty ArrayList
+    testColor = new PVector(0,0,0); //Create PVector for testing color distance
   }
 
-  void update()
+  void update(PImage testImg)
   {
-    for(int i=0;i<numberOfPlayers;i++) worldRecords[i]=500;
-    if(active)
+    if(players.length>0)
     {
+
       ////////////////////////////////////////
-      // Begin loop to walk through every pixel
+      // Loop through each active players neighborhood
+      // find the edges from the last known x,y of the player 
+      // find the middle point of the edges
+      // draw the new location
       ////////////////////////////////////////
-      //need to change this to look throgh just the neighborhood of the last location of each player
-      
-      for (int x = 0; x < testImg.width; x ++ ) {
-        for (int y = 0; y < testImg.height; y ++ ) {
-          int loc = x + y*testImg.width;
-          // What is current color
-          color currentColor = testImg.pixels[loc];
-          float r1 = red(currentColor);
-          float g1 = green(currentColor);
-          float b1 = blue(currentColor);
-          for(int i=0;i<numberOfPlayers;i++)
+      for(int i=0;i<players.length;i++)
+      {
+        if(player.active)
+        {
+          Player player = (Player) players.get(i);
+          
+          //draw the last known location
+          fill(255,0,0);
+          ellipse(player.lastLoc.x, player.lastLoc.y, 10, 10);
+
+          //reset the benchmarks player bounding box
+          player.topEdgeBenchmark=500;
+          player.leftEdgeBenchmark=500;
+          player.rightEdgeBenchmark=500;
+          player.bottomEdgeBenchmark=500;
+
+          //reset the bounding box for the player
+          player.boundaries.clear();
+
+          //take the last known location and find the left and top edge of player bounding box
+          for(int j = (player.neighborhood/2); j > 0; j--)
           {
-            float r2 = red(trackColor[i]);
-            float g2 = green(trackColor[i]);
-            float b2 = blue(trackColor[i]);
+            //testing for top edge
+            color topEdgeColor = testImg.get(player.lastLoc.x, player.lastLoc.y-j);
 
-            // Using euclidean distance to compare colors
-            float d = dist(r1,g1,b1,r2,g2,b2); // We are using the dist( ) function to compare the current color with the color we are tracking.
-
-            // If current color is more similar to tracked color than
-            // closest color, save current location and current difference
-            if (d < worldRecords[i]) 
+            //get the distance between the current color and the players target color
+            float d = colorDistance(topEdgeColor,player.trackColor);
+            if(d < player.topEdgeBenchmark)
             {
-              worldRecords[i] = d;
-              closestX[i] = x;
-              closestY[i] = y;
+              player.topEdgeBenchmark = d;
+              player.boundaries.put("top", player.lastLoc.y-j);
+            }
+
+            //testing for left edge
+            color leftEdgeColor = testImg.get(player.lastLoc.x-j, player.lastLoc.y);
+
+            //get the distance between the current color and the players target color
+            d = colorDistance(leftEdgeColor,player.trackColor);
+            if(d < player.topEdgeBenchmark)
+            {
+              player.topEdgeBenchmark = d;
+              player.boundaries.put("left", player.lastLoc.x-j);
             }
           }
-        }
-      }
 
-      //////////////////////////////////////
-      //now that we have the a location for each player
-      //find the bounding box of the player
-      //and put the players position in the center of the box
-      /////////////////////////////////////
-      
-      for(int i=0;i<numberOfPlayers;i++)
-      {
-        //int loc = x + y*testImg.width;
-        int loc = closestX[i] + closestY[i]*testImg.width;
-        color winningColor = testImg.pixels[loc];
-        float r1 = red(winningColor);
-        float g1 = green(winningColor);
-        float b1 = blue(winningColor);
-
-        //make sure you don't go out of  left bounds
-        if (closestX[i]-colorArea < 0) leftCheckLimit = 0;
-        else leftCheckLimit = closestX[i]-colorArea;
-
-        //scan from center to left edge
-        for(int x = closestX[i]; x > leftCheckLimit; x--)
-        {
-          loc = x + closestY[i]*testImg.width;
-          color testColor = testImg.pixels[loc];
-          float r2 = red(testColor);
-          float g2 = green(testColor);
-          float b2 = blue(testColor);
-          float d = dist(r1,g1,b1,r2,g2,b2);
-          if(d > trackingThreshold)
+          //now that we have the top and left edge
+          //lets get the right and bottom edge
+          for(int j = 0; j < player.neighborhood; j++)
           {
-            boundaries[0] = x+1;
-            break;
+            //testing for right edge
+            color rightEdgeColor = testImg.get(player.boundaries.get("left")+j, player.boundaries.get("top"));       
+            //get the distance between the current color and the players target color
+            float d = colorDistance(rightEdgeColor,player.trackColor);
+            if(d < player.rightEdgeBenchmark)
+            {
+              player.rightEdgeBenchmark = d;
+              player.boundaries.put("right", player.boundaries.get("left")+j);
+            }
+
+            //testing for bottom edge
+            color bottomEdgeColor = testImg.get(player.boundaries.get("left"), player.boundaries.get("top")+j);
+            //get the distance between the current color and the players target color
+            d = colorDistance(bottomEdgeColor,player.trackColor);
+            if(d < player.bottomEdgeBenchmark)
+            {
+              player.bottomEdgeBenchmark = d;
+              player.boundaries.put("bottom", player.boundaries.get("top")+j);
+            }
           }
+
+          //now that we have the bounding box
+          //assign the new players x,y to the center of the bounding box
+          player.currentLoc.x = (player.boundaries.get("right") - player.boundaries.get("left"))/2;
+          player.currentLoc.y = (player.boundaries.get("bottom") - player.boundaries.get("top"))/2;
+
+          //this is not really nesicary at the moment but may need it later
+          player.lastLoc.x = player.currentLoc.x;
+          player.lastLoc.y = player.currentLoc.y;
+
+          //draw the new location
+          fill(0,255,0);
+          ellipse(player.currentLoc.x, player.currentLoc.y, 10, 10);
+
         }
-
-        //make sure you don't go out of right bounds
-        if (closestX[i]+colorArea > width) rightCheckLimit = width;
-        else rightCheckLimit = closestX[i]+colorArea;
-
-        //scan from center to right edge
-        for(int x = closestX[i]; x < rightCheckLimit; x++)
-        {
-          color testColor = testImg.pixels[x + closestY[i]*testImg.width];
-          float r2 = red(testColor);
-          float g2 = green(testColor);
-          float b2 = blue(testColor);
-          float d = dist(r1,g1,b1,r2,g2,b2);
-          if(d > trackingThreshold)
-          {
-            boundaries[1] = x-1;
-            break;
-          }
-        }
-
-        //make sure you don't go out of top bounds
-        if (closestY[i]-colorArea < 0) topCheckLimit = 0;
-        else topCheckLimit = closestY[i]-colorArea;
-
-        //scan from center to top edge
-        for(int y = closestY[i]; y > topCheckLimit; y--)
-        {
-          color testColor = testImg.pixels[closestX[i] + y * testImg.width];
-          float r2 = red(testColor);
-          float g2 = green(testColor);
-          float b2 = blue(testColor);
-          float d = dist(r1,g1,b1,r2,g2,b2);
-          if(d > trackingThreshold)
-          {
-            boundaries[2] = y+1;
-            break;
-          }
-        }
-
-        //make sure you don't go out of  bottom bounds
-        if (closestY[i]+colorArea > height) bottomCheckLimit = height;
-        else bottomCheckLimit = closestY[i]+colorArea;
-
-        //scan from center to bottom edge
-        for(int y = closestY[i]; y < bottomCheckLimit; y++)
-        {
-          color testColor = testImg.pixels[closestX[i] + y * testImg.width];
-          float r2 = red(testColor);
-          float g2 = green(testColor);
-          float b2 = blue(testColor);
-          float d = dist(r1,g1,b1,r2,g2,b2);
-          if(d > trackingThreshold)
-          {
-            boundaries[3] = y-1;
-            break;
-          }
-        }
-
-        //the new horizontal center is the difference between the right and left edge divided by 2
-        correctedX[i] = boundaries[0]+((boundaries[1]-boundaries[0])/2);
-
-        //same for vertical center but with top and bottom edge
-        correctedY[i] = boundaries[2]+((boundaries[3]-boundaries[2])/2);
-      }
-
-
-      /////////////////////////////////
-      //now draw the players location
-      //////////////////////////////////
-
-      for(int i=0;i<numberOfPlayers;i++)
-      {
-        fill(255,0,0);
-        strokeWeight(1);
-        stroke(0);
-        ellipse(closestX[i],closestY[i],8,8);
-        fill(0,255,0);
-        ellipse(correctedX[i],correctedY[i],8,8);
       }
     }
   }
@@ -211,10 +137,26 @@ class Tracking
   void keyPressed()
   {
     println("hello!");
-    active = true;
-    colorTarget = int(key)-49;
+    setPlayerNumber = int(key)-49;
   }
 }
+
+
+float colorDistance(color tC, PVector pC)
+{
+  //load the current color into the testColor vector
+  tC.x = red(topEdgeColor);
+  tC.y = green(topEdgeColor);
+  tC.z = blue(topEdgeColor);
+  return = PVector.dist(tC, pC);
+}
+
+
+
+
+
+
+
 
 
 
