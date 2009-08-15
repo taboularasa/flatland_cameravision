@@ -42,7 +42,7 @@ float camRoll = 0;
 
 void setup() {
   size(640, 600,GLConstants.GLGRAPHICS);
-  frameRate(5);
+  frameRate(60);
 
   //stuff drawing video image to screen
   video = new GSCapture(this, 640, 480, 30);
@@ -60,7 +60,7 @@ void setup() {
 
 void draw() {
 
-  //println(frameRate);
+  println(frameRate);
   
   //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);

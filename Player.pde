@@ -5,7 +5,7 @@ class Player
   int playerSize = 10;
 
   //this is the size of the player bounding box for tracking
-  int neighborhood = 480;
+  int neighborhood = 40;
 
 
   //these are values of player bounding box
@@ -17,6 +17,7 @@ class Player
   //these are benchmarks for finding player bounding box
   //lower the value the closer the match
   //set extra high for initialization
+  float mainPixelBenchmark = 500;
   float topEdgeBenchmark=500;
   float leftEdgeBenchmark=500;
   float rightEdgeBenchmark=500;
@@ -28,6 +29,7 @@ class Player
 
   //for holding locations
   PVector currentLoc;
+  PVector tmpLoc;
   PVector lastLoc;
 
   //this is the color of the player 
@@ -44,6 +46,7 @@ class Player
   {
     //init vectors
     currentLoc = new PVector(0, 0, 0); 
+    tmpLoc = new PVector(0, 0, 0);
     lastLoc = new PVector(0, 0, 0);
     targetColor = new PVector(0, 0, 0);
 
