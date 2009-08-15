@@ -42,7 +42,7 @@ float camRoll = 0;
 
 void setup() {
   size(640, 600,GLConstants.GLGRAPHICS);
-  frameRate(60);
+  frameRate(5);
 
   //stuff drawing video image to screen
   video = new GSCapture(this, 640, 480, 30);
