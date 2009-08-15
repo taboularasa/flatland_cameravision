@@ -43,9 +43,7 @@ class Tracking
 
       if(player.active)
       {
-//        println("this is players colors");
-//        println(player.targetColor.x+" : "+player.targetColor.y+" : "+player.targetColor.y);
-//        println();
+
         //draw the last known location
         fill(255,0,0);
         ellipse(player.lastLoc.x, player.lastLoc.y, 10, 10);
@@ -81,7 +79,7 @@ class Tracking
             }
           }
         }
-
+        /*
         //////////////////////////////
         //take the last known location and find the left and top edge of player bounding box
         //////////////////////////////
@@ -137,12 +135,14 @@ class Tracking
             player.bottomEdgeBenchmark = d;
             player.bottomEdge = player.topEdge+j;
           }
-        }
+        }*/
 
         //now that we have the bounding box
         //assign the new players x,y to the center of the bounding box
-        player.currentLoc.x = player.leftEdge + ((player.rightEdge - player.leftEdge)/2);
-        player.currentLoc.y = player.topEdge + ((player.bottomEdge - player.topEdge)/2);
+        //player.currentLoc.x = player.leftEdge + ((player.rightEdge - player.leftEdge)/2);
+        //player.currentLoc.y = player.topEdge + ((player.bottomEdge - player.topEdge)/2);
+        player.currentLoc = player.tmpLoc;
+        
 
         //keep store the location for the next loop
         player.lastLoc.x = player.currentLoc.x;
