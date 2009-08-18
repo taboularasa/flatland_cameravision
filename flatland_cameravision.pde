@@ -6,6 +6,7 @@ import controlP5.*;
 
 //stuff for GUI
 ControlP5 controlP5;
+Textarea myTextarea;
 int colorTarget;
 
 
@@ -42,13 +43,24 @@ float distance = 32800;
 float camRoll = 0;
 int fps = 30;
 
+
+//stuff for font
+PFont font;
+
+
 void setup() {
   size(640, 600,GLConstants.GLGRAPHICS);
   frameRate(fps);
 
+  //stuff for font
+  font = loadFont("font-12.vlw");
+  textFont(font, 12);
+
   //stuff drawing video image to screen
   video = new GSCapture(this, 640, 480, 30);
   graphics = new Graphics(this);
+
+
 
   //stuff for video capture
   mm = new GSMovieMaker(this, width, height, "data/sesson.ogg", GSMovieMaker.THEORA, GSMovieMaker.HIGH, fps);
@@ -66,7 +78,7 @@ void setup() {
 
 void draw() {
 
-  println(frameRate);
+  //println(frameRate);
 
   //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);
@@ -101,6 +113,7 @@ void draw() {
 
 void keyPressed()
 {
+  gui.keyPressed();
   tracking.keyPressed();
   if (key == ' ') {
     // Finish the movie if space bar is pressed
@@ -150,6 +163,13 @@ void ROLL(float r)
 {
   graphics.ROLL(r);
 }
+
+
+
+
+
+
+
 
 
 
