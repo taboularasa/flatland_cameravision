@@ -1,7 +1,8 @@
 class Tracking
 {
-  //do we really need to keep track of how many players? or can we just do that automatically by changing the size of the player array?
   int numberOfPlayers = 8;
+  
+  int numberOfMarkers = 4;
 
   //this is which players color to set
   int whatPlayer;
@@ -14,6 +15,9 @@ class Tracking
 
   //this holds a list of player objects
   ArrayList players;
+
+  //this holds the four markers that will also be made from player objects
+  ArrayList markers;
 
   //the sketch
   PApplet parent;
@@ -29,8 +33,15 @@ class Tracking
   Tracking(PApplet app)
   {
     parent = app;
-    players = new ArrayList();  // Create an empty ArrayList
+
+    //init the players list
+    players = new ArrayList();  
     for (int i = 0; i < numberOfPlayers ; i++) players.add(new Player());
+
+    markers = new ArrayList();  
+    for (int i = 0; i < numberOfMarkers ; i++) markers.add(new Player());
+
+
     testColor = new PVector(0,0,0); //Create PVector for testing color distance
   }
 
@@ -169,7 +180,8 @@ class Tracking
     {
       if(settingMarkers)
       {
-
+        Player marker = (Player)markers.get(whatMarker);
+        marker.init(mouseX,mouseY,testImg.get(mouseX,mouseY));
       }
       else
       {
@@ -213,6 +225,7 @@ class Tracking
     return PVector.dist(testColor, pC);
   }
 }
+
 
 
 
