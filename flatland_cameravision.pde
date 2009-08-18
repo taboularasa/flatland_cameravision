@@ -27,6 +27,8 @@ Tracking tracking;
 
 // Variable for GSVideo
 GSCapture video;
+GSMovieMaker mm;
+boolean captureMode = false;
 
 //stuff for GLGraphics
 GLCamera cam;
@@ -38,19 +40,23 @@ float[] texcoords;
 int numPoints = 4;
 float distance = 32800;
 float camRoll = 0;
-
+int fps = 30;
 
 void setup() {
   size(640, 600,GLConstants.GLGRAPHICS);
-  frameRate(60);
+  frameRate(fps);
 
   //stuff drawing video image to screen
   video = new GSCapture(this, 640, 480, 30);
   graphics = new Graphics(this);
-  
+
+  //stuff for video capture
+  mm = new GSMovieMaker(this, width, height, "data/sesson.ogg", GSMovieMaker.THEORA, GSMovieMaker.HIGH, fps);
+
+
   //stuff for GUI
   gui = new Gui(this);
-  
+
   //stuff for tracking
   tracking = new Tracking(this);
 
@@ -61,7 +67,7 @@ void setup() {
 void draw() {
 
   println(frameRate);
-  
+
   //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);
   GLGraphics renderer = (GLGraphics)g;
@@ -78,12 +84,17 @@ void draw() {
   testImg.loadPixels();
   //send it to the tracking object
   tracking.update(testImg);
-  
+
   //draw the GUI
   controlP5.draw();
 
-
-
+  //make movie frames if in movie mode
+  if(captureMode == true)
+  {
+    loadPixels();
+    // Add window's pixels to movie
+    mm.addFrame(pixels);
+  }
 }
 
 
@@ -91,6 +102,25 @@ void draw() {
 void keyPressed()
 {
   tracking.keyPressed();
+  if (key == ' ') {
+    // Finish the movie if space bar is pressed
+    mm.finish();
+    // Quit running the sketch once the file is written
+    exit();
+  }
+  if (key == 'v')
+  {
+    mm.start();
+    captureMode = true;
+  }
+  if (key == 'c')
+  {
+    captureMode = true;
+  }
+  if(key == 'x')
+  {
+    captureMode = false;
+  }
 }
 
 void mousePressed()
@@ -120,6 +150,11 @@ void ROLL(float r)
 {
   graphics.ROLL(r);
 }
+
+
+
+
+
 
 
 

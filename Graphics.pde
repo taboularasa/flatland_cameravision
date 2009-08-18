@@ -23,7 +23,7 @@ class Graphics
     //stuff for GLGraphics
     model = new GLModel(parent, numPoints, QUADS, GLModel.DYNAMIC);
     model.initColors();
-    tex = new GLTexture(parent, "milan.jpg");
+    tex = new GLTexture(parent, "titleScreen.jpg");
     cam = new GLCamera(parent, video.width/2, video.height/2, distance, video.width/2, video.height/2-59, 0);
     coords = new float[16];
     colors = new float[4 * numPoints];
