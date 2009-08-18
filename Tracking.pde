@@ -1,7 +1,7 @@
 class Tracking
 {
   int numberOfPlayers = 8;
-  
+
   int numberOfMarkers = 4;
 
   //this is which players color to set
@@ -96,68 +96,69 @@ class Tracking
             }
           }
         }
-        /*
+
         //////////////////////////////
-         //take the last known location and find the left and top edge of player bounding box
-         //////////////////////////////
-         for(int j = player.playerSize; j > 0; j--)
-         {
-         //testing for top edge
-         color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
-         
-         //get the distance between the current color and the players target color
-         float d = colorDistance(topEdgeColor,player.targetColor);
-         if(d < threshold && d < player.topEdgeBenchmark)
-         {
-         player.topEdgeBenchmark = d;
-         int y = (int)player.tmpLoc.y;
-         player.topEdge = (y-j);
-         }
-         
-         //testing for left edge
-         color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
-         
-         //get the distance between the current color and the players target color
-         d = colorDistance(leftEdgeColor,player.targetColor);
-         if(d < threshold && d < player.topEdgeBenchmark)
-         {
-         player.topEdgeBenchmark = d;
-         int x = (int)player.tmpLoc.x;
-         player.leftEdge = (x-j);
-         }
-         }
-         
-         ///////////////////////////////////////
-         //now that we have the top and left edge
-         //lets get the right and bottom edge
-         ///////////////////////////////////////
-         for(int j = 0; j < player.playerSize; j++)
-         {
-         //testing for right edge
-         color rightEdgeColor = testImg.get(player.leftEdge+j, player.topEdge);       
-         //get the distance between the current color and the players target color
-         float d = colorDistance(rightEdgeColor, player.targetColor);
-         if(d < threshold && d < player.rightEdgeBenchmark)
-         {
-         player.rightEdgeBenchmark = d;
-         player.rightEdge = player.leftEdge+j;
-         }
-         
-         //testing for bottom edge
-         color bottomEdgeColor = testImg.get(player.leftEdge, player.topEdge+j);
-         //get the distance between the current color and the players target color
-         d = colorDistance(bottomEdgeColor,player.targetColor);
-         if(d < threshold && d < player.bottomEdgeBenchmark)
-         {
-         player.bottomEdgeBenchmark = d;
-         player.bottomEdge = player.topEdge+j;
-         }
-         }*/
+        //take the last known location and find the left and top edge of player bounding box
+        //////////////////////////////
+        /*for(int j = player.playerSize; j > 0; j--)
+        {
+          //testing for top edge
+          color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
+
+          //get the distance between the current color and the players target color
+          float d = colorDistance(topEdgeColor,player.targetColor);
+          if(d < threshold && d < player.topEdgeBenchmark)
+          {
+            player.topEdgeBenchmark = d;
+            int y = (int)player.tmpLoc.y;
+            player.topEdge = (y-j);
+          }
+
+          //testing for left edge
+          color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
+
+          //get the distance between the current color and the players target color
+          d = colorDistance(leftEdgeColor,player.targetColor);
+          if(d < threshold && d < player.leftEdgeBenchmark)
+          {
+            player.topEdgeBenchmark = d;
+            int x = (int)player.tmpLoc.x;
+            player.leftEdge = (x-j);
+          }
+        }
+
+        ///////////////////////////////////////
+        //now that we have the top and left edge
+        //lets get the right and bottom edge
+        ///////////////////////////////////////
+        for(int j = 0; j < player.playerSize; j++)
+        {
+          //testing for right edge
+          color rightEdgeColor = testImg.get(player.leftEdge+j, player.topEdge);       
+          //get the distance between the current color and the players target color
+          float d = colorDistance(rightEdgeColor, player.targetColor);
+          if(d < threshold && d < player.rightEdgeBenchmark)
+          {
+            player.rightEdgeBenchmark = d;
+            player.rightEdge = player.leftEdge+j;
+          }
+
+          //testing for bottom edge
+          color bottomEdgeColor = testImg.get(player.leftEdge, player.topEdge+j);
+          //get the distance between the current color and the players target color
+          d = colorDistance(bottomEdgeColor,player.targetColor);
+          if(d < threshold && d < player.bottomEdgeBenchmark)
+          {
+            player.bottomEdgeBenchmark = d;
+            player.bottomEdge = player.topEdge+j;
+          }
+        }*/
 
         //now that we have the bounding box
         //assign the new players x,y to the center of the bounding box
         //player.currentLoc.x = player.leftEdge + ((player.rightEdge - player.leftEdge)/2);
         //player.currentLoc.y = player.topEdge + ((player.bottomEdge - player.topEdge)/2);
+
         player.currentLoc = player.tmpLoc;
 
 
@@ -225,6 +226,8 @@ class Tracking
     return PVector.dist(testColor, pC);
   }
 }
+
+
 
 
 
