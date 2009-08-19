@@ -7,8 +7,9 @@ import controlP5.*;
 //stuff for networking
 Messenger messenger;
 //name your server here or use localhost if no server is available
-//String SERVER = "192.168.1.100";
-String SERVER = "localhost";
+String SERVER = "169.232.213.234";
+//String SERVER = "localhost";
+boolean USE_SERVER = true;
 
 //stuff for GUI
 ControlP5 controlP5;
@@ -63,7 +64,7 @@ void setup() {
 
 
   //stuff for networking
-  messenger = new Messenger(this,SERVER);
+  messenger = new Messenger(this, SERVER, USE_SERVER);
 
 
   //stuff for video capture
@@ -74,13 +75,13 @@ void setup() {
   gui = new Gui(this);
 
   //stuff for tracking
-  tracking = new Tracking(this,messenger);
+  tracking = new Tracking(this, messenger);
   
 }
 
 void draw() {
 
-  println(frameRate);
+  //println(frameRate);
 
   //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);
@@ -111,11 +112,12 @@ void draw() {
   }
   
   //send a message to the network
-  if(messenger.ready)
-  {
+  //println(messenger.ready);
+  //if(messenger.ready)
+  //{
     messenger.sendMessage();
     messenger.resetMessage();
-  }
+  //}
   
 }
 

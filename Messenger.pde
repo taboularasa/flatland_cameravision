@@ -1,38 +1,39 @@
 class Messenger
-{
+{ 
+  float lastSent = 0;
   PApplet parent;
   //stuff for TCP
   Client myClient;
   String serverMessage = "";
   boolean ready = false;
+  boolean active = false;
 
-  boolean networkingEnabled = false;
 
-  Messenger(PApplet app, String server)
+  Messenger(PApplet app, String server, boolean _active)
   {
+    active = _active;
     parent = app;
-    if(networkingEnabled)
-    {
-      //stuff for networking
-      myClient = new Client(parent, server, 51007);
-    }
-
+    //stuff for networking
+    if(active) myClient = new Client(parent, server, 51007);
   }
-  
+
   void resetMessage()
   {
     serverMessage = "";
     ready = false;
   }
-  
+
   void addMessage(String nm)
   {
     serverMessage += nm;
   }
-  
+
   void sendMessage()
   {
-    myClient.write(serverMessage);
+    println(millis()-lastSent);
+    lastSent = millis();
+      if(active) myClient.write(serverMessage);
+    //println("hello");
   }
 
   String PEGMessage(String name, int y, int x)
@@ -45,6 +46,7 @@ class Messenger
     msg = makeMessage(msg);
     return msg;  
   }
+
   String zfill(String m, int l){
     String r = "";
     for(int i = 0; i < l - m.length(); i++) 
@@ -54,6 +56,7 @@ class Messenger
     r+=m;
     return r;
   }
+
   String zfill(int m, int l){
     String s = "" + m;
     return zfill(s,l);
@@ -63,6 +66,9 @@ class Messenger
     return zfill(s,6) + m;
   }
 }
+
+
+
 
 
 

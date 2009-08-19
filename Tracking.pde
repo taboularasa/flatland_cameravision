@@ -112,6 +112,11 @@ class Tracking
             }
           }
         }
+        
+        for(int j = 0; j < player.playerSize; j++)
+        {
+          color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
+        }
 
         //player.currentLoc = player.tmpLoc;
         player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
@@ -124,14 +129,8 @@ class Tracking
 
         //draw the new location
         noStroke();
-        if(player.isMarker)
-        {
-          fill(0,0,255);
-        }
-        else
-        {
-          fill(0,255,0); 
-        }
+        if(player.isMarker) fill(0,0,255);
+        else fill(0,255,0); 
         ellipse(player.currentLoc.x, player.currentLoc.y, 5, 5);
         //keep store the location for the next loop
         player.lastLoc = player.currentLoc;
@@ -150,6 +149,7 @@ class Tracking
     {
       Player marker = (Player) markers.get(i);
       if(!marker.active) markersSet = false;
+      else markersSet = true;
     }
     //println(markersSet);
 
@@ -166,17 +166,22 @@ class Tracking
       for(int i=0;i<players.size();i++)
       {
         Player player = (Player) players.get(i);
-        if(player.active)
+        if(player.active && !player.isMarker)
         {
           //this would be a good place to correct players location based on the movement of the filed markers
           
           //use the field markers to rectify the position of eadch player
           player.rectifiedLoc = correctLocation.rectify(player.currentLoc,uL.currentLoc,uR.currentLoc,lR.currentLoc,lL.currentLoc);
           
+          //draw the corrected location
+          fill(255,0,0);
+          ellipse(player.rectifiedLoc.x, player.rectifiedLoc.y, 5, 5);
           //add their rectified position to the messengers message
-          messenger.addMessage(messenger.PEGMessage("Player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y));
+          String msg = messenger.PEGMessage("player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y);
+          messenger.addMessage(msg);
         }
         messenger.ready = true;
+        //println(messenger.ready);
       }
     }
   }
