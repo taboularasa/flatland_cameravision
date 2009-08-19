@@ -36,11 +36,13 @@ class Tracking
   //correct the locations based on the boundary markers
   CorrectLocation correctLocation = new CorrectLocation();
 
+  //Stuff for networking
+  Messenger messenger;
 
-
-  Tracking(PApplet app)
+  Tracking(PApplet app, Messenger msg)
   {
     parent = app;
+    messenger = msg;
 
     //init the players list
     players = new ArrayList();  
@@ -166,8 +168,15 @@ class Tracking
         Player player = (Player) players.get(i);
         if(player.active)
         {
+          //this would be a good place to correct players location based on the movement of the filed markers
+          
+          //use the field markers to rectify the position of eadch player
           player.rectifiedLoc = correctLocation.rectify(player.currentLoc,uL.currentLoc,uR.currentLoc,lR.currentLoc,lL.currentLoc);
+          
+          //add their rectified position to the messengers message
+          messenger.addMessage(messenger.PEGMessage("Player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y));
         }
+        messenger.ready = true;
       }
     }
   }

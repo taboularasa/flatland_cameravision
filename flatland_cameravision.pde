@@ -4,9 +4,11 @@ import codeanticode.glgraphics.*;
 import processing.net.*; 
 import controlP5.*;
 
-//stuff for TCP
-Client myClient;
-String serverMessage = "";
+//stuff for networking
+Messenger messenger;
+//name your server here or use localhost if no server is available
+//String SERVER = "192.168.1.100";
+String SERVER = "localhost";
 
 //stuff for GUI
 ControlP5 controlP5;
@@ -60,6 +62,9 @@ void setup() {
   graphics = new Graphics(this);
 
 
+  //stuff for networking
+  messenger = new Messenger(this,SERVER);
+
 
   //stuff for video capture
   mm = new GSMovieMaker(this, width, height, "data/sesson.ogg", GSMovieMaker.THEORA, GSMovieMaker.HIGH, fps);
@@ -69,10 +74,8 @@ void setup() {
   gui = new Gui(this);
 
   //stuff for tracking
-  tracking = new Tracking(this);
-
-  //stuff for networking
-  //myClient = new Client(this, "192.168.1.100", 51007);
+  tracking = new Tracking(this,messenger);
+  
 }
 
 void draw() {
@@ -108,6 +111,11 @@ void draw() {
   }
   
   //send a message to the network
+  if(messenger.ready)
+  {
+    messenger.sendMessage();
+    messenger.resetMessage();
+  }
   
 }
 
