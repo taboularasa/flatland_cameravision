@@ -19,11 +19,11 @@ class Gui
       "label2", 
       "COMMANDS:\n"+
       "0-9 are for selecting players\n"+
-      "'a','s','d' and 'f' are for selecting markers\n"+
-      "'k' will reset all players\n"+
-      "'v' starts recording\n"+
-      "'x' pauses recording\n"+
-      "'c' resumes recording\n"+
+      "'A','S','D' and 'F' are for selecting markers\n"+
+      "'K' will reset all players\n"+
+      "'V' starts recording\n"+
+      "'X' pauses recording\n"+
+      "'C' resumes recording\n"+
       "space bar ends recording and quits applicaiton\n", 350,510,300,300);
     myTextarea.setColorForeground(0xffff0000);
 

@@ -4,6 +4,10 @@ import codeanticode.glgraphics.*;
 import processing.net.*; 
 import controlP5.*;
 
+//stuff for TCP
+Client myClient;
+String serverMessage = "";
+
 //stuff for GUI
 ControlP5 controlP5;
 Textarea myTextarea;
@@ -16,12 +20,6 @@ int topMargin = 40;
 int bottomMargin = 520;
 int sheerVertex = 0;
 PImage testImg;
-
-
-//stuff for TCP
-Client myClient;
-String serverMessage = "";
-
 
 Graphics graphics;
 Gui gui;
@@ -108,6 +106,9 @@ void draw() {
     // Add window's pixels to movie
     mm.addFrame(pixels);
   }
+  
+  //send a message to the network
+  
 }
 
 
@@ -164,6 +165,7 @@ void ROLL(float r)
 {
   graphics.ROLL(r);
 }
+
 
 
 

@@ -18,10 +18,7 @@ class Player
   //lower the value the closer the match
   //set extra high for initialization
   float mainPixelBenchmark = 500;
-  float topEdgeBenchmark=500;
-  float leftEdgeBenchmark=500;
-  float rightEdgeBenchmark=500;
-  float bottomEdgeBenchmark=500;
+
 
 
   //this is for color match tolerance in finding the of the player
@@ -31,6 +28,7 @@ class Player
   PVector currentLoc;
   PVector tmpLoc;
   PVector lastLoc;
+  PVector rectifiedLoc;
 
   //this is the color of the player 
   //stored in a PVector for checking distances from other colors
@@ -40,6 +38,9 @@ class Player
 
   //should I be tracked?
   boolean active = false;
+  
+  //is this a bnoundary marker?
+  boolean isMarker = false;
   
   
 

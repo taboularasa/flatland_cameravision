@@ -1,5 +1,6 @@
 class Tracking
 {
+  
   int numberOfPlayers = 10;
 
   int numberOfMarkers = 4;
@@ -19,6 +20,10 @@ class Tracking
   //this holds the four markers that will also be made from player objects
   ArrayList markers;
 
+  //this is to wait for all the markers to be set
+  //before we start using them to correct locations
+  boolean markersSet = false; 
+
   //the sketch
   PApplet parent;
 
@@ -28,6 +33,9 @@ class Tracking
   //make sure that the boundries are somewhere near the value of the actual color
   int threshold = 20;
 
+  //correct the locations based on the boundary markers
+  CorrectLocation correctLocation = new CorrectLocation();
+
 
 
   Tracking(PApplet app)
@@ -36,10 +44,19 @@ class Tracking
 
     //init the players list
     players = new ArrayList();  
-    for (int i = 0; i < numberOfPlayers ; i++) players.add(new Player());
+    for (int i = 0; i < numberOfPlayers ; i++)
+    {
+      players.add(new Player());
+    }
 
     markers = new ArrayList();  
-    for (int i = 0; i < numberOfMarkers ; i++) markers.add(new Player());
+    for (int i = 0; i < numberOfMarkers ; i++)
+    {
+      Player player = new Player();
+      player.isMarker = true;
+      players.add(player);
+      markers.add(player);
+    }
 
 
     testColor = new PVector(0,0,0); //Create PVector for testing color distance
@@ -47,12 +64,15 @@ class Tracking
 
   void update(PImage t)
   {
+    //take the passed in image and store it
     testImg = t;
+
     ////////////////////////////////////////
+    // This section is to set tracking for player markers
     // Loop through each active player's neighborhood
-    // find the edges from the last known x,y of the player 
-    // find the middle point of the edges
-    // draw the new location
+    // and find the closest pixel to the players color
+    // average the new location with the last location to smooth out the 
+    // motion
     ////////////////////////////////////////
     for(int i=0;i<players.size();i++)
     {
@@ -63,10 +83,7 @@ class Tracking
 
         //reset the benchmarks player bounding box
         player.mainPixelBenchmark = 500;
-        player.topEdgeBenchmark=500;
-        player.leftEdgeBenchmark=500;
-        player.rightEdgeBenchmark=500;
-        player.bottomEdgeBenchmark=500;
+
 
         //reset the bounding box for the player
         player.leftEdge = 0;
@@ -103,14 +120,54 @@ class Tracking
         strokeWeight(5);
         line(player.currentLoc.x, player.currentLoc.y, player.lastLoc.x, player.lastLoc.y);
 
-        //draw the last known location
+        //draw the new location
         noStroke();
-        fill(0,255,0);
+        if(player.isMarker)
+        {
+          fill(0,0,255);
+        }
+        else
+        {
+          fill(0,255,0); 
+        }
         ellipse(player.currentLoc.x, player.currentLoc.y, 5, 5);
-
         //keep store the location for the next loop
         player.lastLoc = player.currentLoc;
+      }
+    }
 
+    /////////////////////////////////
+    // This section takes the position of all the markers
+    // uses them to correct the position of all the players
+    // then sends the corrected positions out to the network
+    //////////////////////////////////
+
+    // first test all the markers to make sure that we have them all set
+    // before we send them to the rectify function
+    for(int i = 0; i < numberOfMarkers; i++)
+    {
+      Player marker = (Player) markers.get(i);
+      if(!marker.active) markersSet = false;
+    }
+    //println(markersSet);
+
+    // if all the markers are set then 
+    // loop through each players location 
+    // and send that players location + markers location
+    // to the rectify function
+    if(markersSet)
+    {
+      Player uL = (Player) markers.get(0);
+      Player uR = (Player) markers.get(1);
+      Player lR = (Player) markers.get(2);
+      Player lL = (Player) markers.get(3);
+      for(int i=0;i<players.size();i++)
+      {
+        Player player = (Player) players.get(i);
+        if(player.active)
+        {
+          player.rectifiedLoc = correctLocation.rectify(player.currentLoc,uL.currentLoc,uR.currentLoc,lR.currentLoc,lL.currentLoc);
+        }
       }
     }
   }
@@ -188,6 +245,22 @@ class Tracking
     return dist(r1,g1,b1,r2,g2,b2);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
