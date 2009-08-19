@@ -7,6 +7,7 @@ import controlP5.*;
 //stuff for GUI
 ControlP5 controlP5;
 Textarea myTextarea;
+Textarea selectLabel;
 int colorTarget;
 
 
@@ -78,7 +79,7 @@ void setup() {
 
 void draw() {
 
-  //println(frameRate);
+  println(frameRate);
 
   //draw the video to the screen
   hint(ENABLE_DEPTH_TEST);

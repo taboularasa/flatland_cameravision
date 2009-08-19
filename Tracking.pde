@@ -1,6 +1,6 @@
 class Tracking
 {
-  int numberOfPlayers = 8;
+  int numberOfPlayers = 10;
 
   int numberOfMarkers = 4;
 
@@ -26,7 +26,7 @@ class Tracking
   PImage testImg;
 
   //make sure that the boundries are somewhere near the value of the actual color
-  int threshold = 50;
+  int threshold = 20;
 
 
 
@@ -61,10 +61,6 @@ class Tracking
       if(player.active)
       {
 
-        //draw the last known location
-        fill(255,0,0);
-        ellipse(player.lastLoc.x, player.lastLoc.y, 10, 10);
-
         //reset the benchmarks player bounding box
         player.mainPixelBenchmark = 500;
         player.topEdgeBenchmark=500;
@@ -93,82 +89,27 @@ class Tracking
               player.mainPixelBenchmark = d;
               player.tmpLoc.x = x;
               player.tmpLoc.y = y;
+              player.currentColor = mainPixelColor;
             }
           }
         }
 
-        //////////////////////////////
-        //take the last known location and find the left and top edge of player bounding box
-        //////////////////////////////
-        /*for(int j = player.playerSize; j > 0; j--)
-        {
-          //testing for top edge
-          color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
+        //player.currentLoc = player.tmpLoc;
+        player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
 
-          //get the distance between the current color and the players target color
-          float d = colorDistance(topEdgeColor,player.targetColor);
-          if(d < threshold && d < player.topEdgeBenchmark)
-          {
-            player.topEdgeBenchmark = d;
-            int y = (int)player.tmpLoc.y;
-            player.topEdge = (y-j);
-          }
+        //draw a line from the new location to last location
+        stroke(255,0,0);
+        strokeCap(ROUND);
+        strokeWeight(5);
+        line(player.currentLoc.x, player.currentLoc.y, player.lastLoc.x, player.lastLoc.y);
 
-          //testing for left edge
-          color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
-
-          //get the distance between the current color and the players target color
-          d = colorDistance(leftEdgeColor,player.targetColor);
-          if(d < threshold && d < player.leftEdgeBenchmark)
-          {
-            player.topEdgeBenchmark = d;
-            int x = (int)player.tmpLoc.x;
-            player.leftEdge = (x-j);
-          }
-        }
-
-        ///////////////////////////////////////
-        //now that we have the top and left edge
-        //lets get the right and bottom edge
-        ///////////////////////////////////////
-        for(int j = 0; j < player.playerSize; j++)
-        {
-          //testing for right edge
-          color rightEdgeColor = testImg.get(player.leftEdge+j, player.topEdge);       
-          //get the distance between the current color and the players target color
-          float d = colorDistance(rightEdgeColor, player.targetColor);
-          if(d < threshold && d < player.rightEdgeBenchmark)
-          {
-            player.rightEdgeBenchmark = d;
-            player.rightEdge = player.leftEdge+j;
-          }
-
-          //testing for bottom edge
-          color bottomEdgeColor = testImg.get(player.leftEdge, player.topEdge+j);
-          //get the distance between the current color and the players target color
-          d = colorDistance(bottomEdgeColor,player.targetColor);
-          if(d < threshold && d < player.bottomEdgeBenchmark)
-          {
-            player.bottomEdgeBenchmark = d;
-            player.bottomEdge = player.topEdge+j;
-          }
-        }*/
-
-        //now that we have the bounding box
-        //assign the new players x,y to the center of the bounding box
-        //player.currentLoc.x = player.leftEdge + ((player.rightEdge - player.leftEdge)/2);
-        //player.currentLoc.y = player.topEdge + ((player.bottomEdge - player.topEdge)/2);
-
-        player.currentLoc = player.tmpLoc;
-
+        //draw the last known location
+        noStroke();
+        fill(0,255,0);
+        ellipse(player.currentLoc.x, player.currentLoc.y, 5, 5);
 
         //keep store the location for the next loop
-        player.lastLoc.x = player.currentLoc.x;
-        player.lastLoc.y = player.currentLoc.y;
-
-        //draw the new location
-        fill(0,255,0);
-        ellipse(player.currentLoc.x, player.currentLoc.y, 10, 10);
+        player.lastLoc = player.currentLoc;
 
       }
     }
@@ -195,7 +136,15 @@ class Tracking
 
   void keyPressed()
   {
-    if(key == 'v' || key == 'c' || key == 'x')
+    if(key == 'k')
+    {
+      for (int i = 0; i < numberOfPlayers ; i++)
+      {
+        Player player = (Player) players.get(i);
+        player.disable();
+      } 
+    }
+    else if(key == 'v' || key == 'c' || key == 'x')
     {
       return;
     }
@@ -225,7 +174,26 @@ class Tracking
     testColor.z = blue(tC);
     return PVector.dist(testColor, pC);
   }
+
+  float colorDistance(color tC, color mC)
+  {
+    float r1 = red(mC);
+    float g1 = green(mC);
+    float b1 = blue(mC);
+
+    float r2 = red(tC);
+    float g2 = green(tC);
+    float b2 = blue(tC);
+
+    return dist(r1,g1,b1,r2,g2,b2);
+  }
 }
+
+
+
+
+
+
 
 
 

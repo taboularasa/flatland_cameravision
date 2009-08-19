@@ -14,7 +14,17 @@ class Gui
     s = controlP5.addSlider("SY",-10,10,0,10,536,300,10);
 
 
-    myTextarea = controlP5.addTextarea("label1", "no selection", 350,490,300,20);
+    selectLabel = controlP5.addTextarea("label1", "no selection", 350,490,300,20);
+    myTextarea = controlP5.addTextarea(
+      "label2", 
+      "COMMANDS:\n"+
+      "0-9 are for selecting players\n"+
+      "'a','s','d' and 'f' are for selecting markers\n"+
+      "'k' will reset all players\n"+
+      "'v' starts recording\n"+
+      "'x' pauses recording\n"+
+      "'c' resumes recording\n"+
+      "space bar ends recording and quits applicaiton\n", 350,510,300,300);
     myTextarea.setColorForeground(0xffff0000);
 
   }
@@ -24,78 +34,78 @@ class Gui
     //team one players
     if(key == '0')
     {
-      myTextarea.setText("team one : player one");
+      selectLabel.setText("team one : player one");
     }
     if(key == '1')
     {
-      myTextarea.setText("team one : player two");
+      selectLabel.setText("team one : player two");
     }
     if(key == '2')
     {
-      myTextarea.setText("team one : player three");
+      selectLabel.setText("team one : player three");
     }
     if(key == '3')
     {
-      myTextarea.setText("team one : player four");
+      selectLabel.setText("team one : player four");
     }
     if(key == '4')
     {
-      myTextarea.setText("team one : player five");
+      selectLabel.setText("team one : player five");
     }
     
     //team two players
     if(key == '5')
     {
-      myTextarea.setText("team two : player one");
+      selectLabel.setText("team two : player one");
     }
     if(key == '6')
     {
-      myTextarea.setText("team two : player two");
+      selectLabel.setText("team two : player two");
     }
     if(key == '7')
     {
-      myTextarea.setText("team two : player three");
+      selectLabel.setText("team two : player three");
     }
     if(key == '8')
     {
-      myTextarea.setText("team two : player four");
+      selectLabel.setText("team two : player four");
     }
     if(key == '9')
     {
-      myTextarea.setText("team two : player five");
+      selectLabel.setText("team two : player five");
     }
     
     
     //these are keys for setting markers
     if(key == 'a')
     {
-      myTextarea.setText("marker : upper left");
+      selectLabel.setText("marker : upper left");
     }
     if(key == 's')
     {
-      myTextarea.setText("marker : upper right");
+      selectLabel.setText("marker : upper right");
     }
     if(key == 'd')
     {
-      myTextarea.setText("marker : lower right");
+      selectLabel.setText("marker : lower right");
     }
     if(key == 'f')
     {
-      myTextarea.setText("marker : lower left");
+      selectLabel.setText("marker : lower left");
     }
 
     //this are keys for video capture
     if(key == 'v')
     {
-      myTextarea.setText("recording started");
+      selectLabel.setText("recording started");
     }
     if(key == 'c')
     {
-      myTextarea.setText("recording resumed");
+      selectLabel.setText("recording resumed");
     }
     if(key == 'x')
     {
-      myTextarea.setText("recording paused");
+      selectLabel.setText("recording paused");
     }
   }
 

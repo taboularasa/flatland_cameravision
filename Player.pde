@@ -2,7 +2,7 @@ class Player
 {
 
   //this is the size of the bounding box for the player
-  int playerSize = 10;
+  int playerSize = 5;
 
   //this is the size of the player bounding box for tracking
   int neighborhood = 40;
@@ -35,6 +35,8 @@ class Player
   //this is the color of the player 
   //stored in a PVector for checking distances from other colors
   PVector targetColor;
+  //this is the closet match found in the current loop
+  color currentColor;
 
   //should I be tracked?
   boolean active = false;
