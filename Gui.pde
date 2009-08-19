@@ -12,6 +12,7 @@ class Gui
     s = controlP5.addSlider("ROLL",-5,5,0,10,512,300,10);
     s = controlP5.addSlider("SX",-10,10,0,10,524,300,10);
     s = controlP5.addSlider("SY",-10,10,0,10,536,300,10);
+    s = controlP5.addSlider("TRACKING",0,500,20,10,548,300,10);
 
 
     selectLabel = controlP5.addTextarea("label1", "no selection", 350,490,300,20);

@@ -30,8 +30,8 @@ class Messenger
 
   void sendMessage()
   {
-    println(millis()-lastSent);
-    lastSent = millis();
+    //println(millis()-lastSent);
+    //lastSent = millis();
       if(active) myClient.write(serverMessage);
     //println("hello");
   }

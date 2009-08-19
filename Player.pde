@@ -2,10 +2,10 @@ class Player
 {
 
   //this is the size of the bounding box for the player
-  int playerSize = 5;
+  int playerSize = 40;
 
   //this is the size of the player bounding box for tracking
-  int neighborhood = 40;
+  int neighborhood = 70;
 
 
   //these are values of player bounding box
@@ -29,6 +29,9 @@ class Player
   PVector tmpLoc;
   PVector lastLoc;
   PVector rectifiedLoc;
+  
+
+  
 
   //this is the color of the player 
   //stored in a PVector for checking distances from other colors
