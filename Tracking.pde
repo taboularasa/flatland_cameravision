@@ -1,7 +1,9 @@
 class Tracking
 {
-  //do we really need to keep track of how many players? or can we just do that automatically by changing the size of the player array?
-  int numberOfPlayers = 8;
+  
+  int numberOfPlayers = 10;
+
+  int numberOfMarkers = 4;
 
   //this is which players color to set
   int whatPlayer;
@@ -15,6 +17,13 @@ class Tracking
   //this holds a list of player objects
   ArrayList players;
 
+  //this holds the four markers that will also be made from player objects
+  ArrayList markers;
+
+  //this is to wait for all the markers to be set
+  //before we start using them to correct locations
+  boolean markersSet = false; 
+
   //the sketch
   PApplet parent;
 
@@ -22,26 +31,50 @@ class Tracking
   PImage testImg;
 
   //make sure that the boundries are somewhere near the value of the actual color
-  int threshold = 50;
+  int threshold = 20;
 
+  //correct the locations based on the boundary markers
+  CorrectLocation correctLocation = new CorrectLocation();
 
+  //Stuff for networking
+  Messenger messenger;
 
-  Tracking(PApplet app)
+  Tracking(PApplet app, Messenger msg)
   {
     parent = app;
-    players = new ArrayList();  // Create an empty ArrayList
-    for (int i = 0; i < numberOfPlayers ; i++) players.add(new Player());
+    messenger = msg;
+
+    //init the players list
+    players = new ArrayList();  
+    for (int i = 0; i < numberOfPlayers ; i++)
+    {
+      players.add(new Player());
+    }
+
+    markers = new ArrayList();  
+    for (int i = 0; i < numberOfMarkers ; i++)
+    {
+      Player player = new Player();
+      player.isMarker = true;
+      players.add(player);
+      markers.add(player);
+    }
+
+
     testColor = new PVector(0,0,0); //Create PVector for testing color distance
   }
 
   void update(PImage t)
   {
+    //take the passed in image and store it
     testImg = t;
+
     ////////////////////////////////////////
+    // This section is to set tracking for player markers
     // Loop through each active player's neighborhood
-    // find the edges from the last known x,y of the player 
-    // find the middle point of the edges
-    // draw the new location
+    // and find the closest pixel to the players color
+    // average the new location with the last location to smooth out the 
+    // motion
     ////////////////////////////////////////
     for(int i=0;i<players.size();i++)
     {
@@ -50,16 +83,9 @@ class Tracking
       if(player.active)
       {
 
-        //draw the last known location
-        fill(255,0,0);
-        ellipse(player.lastLoc.x, player.lastLoc.y, 10, 10);
-
         //reset the benchmarks player bounding box
         player.mainPixelBenchmark = 500;
-        player.topEdgeBenchmark=500;
-        player.leftEdgeBenchmark=500;
-        player.rightEdgeBenchmark=500;
-        player.bottomEdgeBenchmark=500;
+
 
         //reset the bounding box for the player
         player.leftEdge = 0;
@@ -82,82 +108,75 @@ class Tracking
               player.mainPixelBenchmark = d;
               player.tmpLoc.x = x;
               player.tmpLoc.y = y;
+              player.currentColor = mainPixelColor;
             }
           }
         }
-        /*
-        //////////////////////////////
-         //take the last known location and find the left and top edge of player bounding box
-         //////////////////////////////
-         for(int j = player.playerSize; j > 0; j--)
-         {
-         //testing for top edge
-         color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
-         
-         //get the distance between the current color and the players target color
-         float d = colorDistance(topEdgeColor,player.targetColor);
-         if(d < threshold && d < player.topEdgeBenchmark)
-         {
-         player.topEdgeBenchmark = d;
-         int y = (int)player.tmpLoc.y;
-         player.topEdge = (y-j);
-         }
-         
-         //testing for left edge
-         color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
-         
-         //get the distance between the current color and the players target color
-         d = colorDistance(leftEdgeColor,player.targetColor);
-         if(d < threshold && d < player.topEdgeBenchmark)
-         {
-         player.topEdgeBenchmark = d;
-         int x = (int)player.tmpLoc.x;
-         player.leftEdge = (x-j);
-         }
-         }
-         
-         ///////////////////////////////////////
-         //now that we have the top and left edge
-         //lets get the right and bottom edge
-         ///////////////////////////////////////
-         for(int j = 0; j < player.playerSize; j++)
-         {
-         //testing for right edge
-         color rightEdgeColor = testImg.get(player.leftEdge+j, player.topEdge);       
-         //get the distance between the current color and the players target color
-         float d = colorDistance(rightEdgeColor, player.targetColor);
-         if(d < threshold && d < player.rightEdgeBenchmark)
-         {
-         player.rightEdgeBenchmark = d;
-         player.rightEdge = player.leftEdge+j;
-         }
-         
-         //testing for bottom edge
-         color bottomEdgeColor = testImg.get(player.leftEdge, player.topEdge+j);
-         //get the distance between the current color and the players target color
-         d = colorDistance(bottomEdgeColor,player.targetColor);
-         if(d < threshold && d < player.bottomEdgeBenchmark)
-         {
-         player.bottomEdgeBenchmark = d;
-         player.bottomEdge = player.topEdge+j;
-         }
-         }*/
 
-        //now that we have the bounding box
-        //assign the new players x,y to the center of the bounding box
-        //player.currentLoc.x = player.leftEdge + ((player.rightEdge - player.leftEdge)/2);
-        //player.currentLoc.y = player.topEdge + ((player.bottomEdge - player.topEdge)/2);
-        player.currentLoc = player.tmpLoc;
+        //player.currentLoc = player.tmpLoc;
+        player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
 
-
-        //keep store the location for the next loop
-        player.lastLoc.x = player.currentLoc.x;
-        player.lastLoc.y = player.currentLoc.y;
+        //draw a line from the new location to last location
+        stroke(255,0,0);
+        strokeCap(ROUND);
+        strokeWeight(5);
+        line(player.currentLoc.x, player.currentLoc.y, player.lastLoc.x, player.lastLoc.y);
 
         //draw the new location
-        fill(0,255,0);
-        ellipse(player.currentLoc.x, player.currentLoc.y, 10, 10);
+        noStroke();
+        if(player.isMarker)
+        {
+          fill(0,0,255);
+        }
+        else
+        {
+          fill(0,255,0); 
+        }
+        ellipse(player.currentLoc.x, player.currentLoc.y, 5, 5);
+        //keep store the location for the next loop
+        player.lastLoc = player.currentLoc;
+      }
+    }
 
+    /////////////////////////////////
+    // This section takes the position of all the markers
+    // uses them to correct the position of all the players
+    // then sends the corrected positions out to the network
+    //////////////////////////////////
+
+    // first test all the markers to make sure that we have them all set
+    // before we send them to the rectify function
+    for(int i = 0; i < numberOfMarkers; i++)
+    {
+      Player marker = (Player) markers.get(i);
+      if(!marker.active) markersSet = false;
+    }
+    //println(markersSet);
+
+    // if all the markers are set then 
+    // loop through each players location 
+    // and send that players location + markers location
+    // to the rectify function
+    if(markersSet)
+    {
+      Player uL = (Player) markers.get(0);
+      Player uR = (Player) markers.get(1);
+      Player lR = (Player) markers.get(2);
+      Player lL = (Player) markers.get(3);
+      for(int i=0;i<players.size();i++)
+      {
+        Player player = (Player) players.get(i);
+        if(player.active)
+        {
+          //this would be a good place to correct players location based on the movement of the filed markers
+          
+          //use the field markers to rectify the position of eadch player
+          player.rectifiedLoc = correctLocation.rectify(player.currentLoc,uL.currentLoc,uR.currentLoc,lR.currentLoc,lL.currentLoc);
+          
+          //add their rectified position to the messengers message
+          messenger.addMessage(messenger.PEGMessage("Player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y));
+        }
+        messenger.ready = true;
       }
     }
   }
@@ -169,7 +188,10 @@ class Tracking
     {
       if(settingMarkers)
       {
-        
+
+        Player marker = (Player)markers.get(whatMarker);
+        marker.init(mouseX,mouseY,testImg.get(mouseX,mouseY));
+
       }
       else
       {
@@ -182,7 +204,15 @@ class Tracking
 
   void keyPressed()
   {
-    if(key == 'v' || key == 'c' || key == 'x')
+    if(key == 'k')
+    {
+      for (int i = 0; i < numberOfPlayers ; i++)
+      {
+        Player player = (Player) players.get(i);
+        player.disable();
+      } 
+    }
+    else if(key == 'v' || key == 'c' || key == 'x')
     {
       return;
     }
@@ -212,34 +242,20 @@ class Tracking
     testColor.z = blue(tC);
     return PVector.dist(testColor, pC);
   }
+
+  float colorDistance(color tC, color mC)
+  {
+    float r1 = red(mC);
+    float g1 = green(mC);
+    float b1 = blue(mC);
+
+    float r2 = red(tC);
+    float g2 = green(tC);
+    float b2 = blue(tC);
+
+    return dist(r1,g1,b1,r2,g2,b2);
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
