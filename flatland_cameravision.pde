@@ -7,7 +7,7 @@ import controlP5.*;
 //stuff for networking
 Messenger messenger;
 //name your server here or use localhost if no server is available
-String SERVER = "169.232.213.234";
+String SERVER = "192.168.1.103";
 //String SERVER = "localhost";
 boolean USE_SERVER = true;
 
