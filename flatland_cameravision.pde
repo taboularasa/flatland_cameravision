@@ -7,8 +7,9 @@ import controlP5.*;
 //stuff for networking
 Messenger messenger;
 //name your server here or use localhost if no server is available
-//String SERVER = "192.168.1.100";
+//String SERVER = "127.0.0.1";
 String SERVER = "localhost";
+boolean USE_SERVER = true;
 
 //stuff for GUI
 ControlP5 controlP5;
@@ -30,7 +31,7 @@ Tracking tracking;
 // Variable for GSVideo
 GSCapture video;
 GSMovieMaker mm;
-boolean captureMode = false;
+boolean captureMode = true;
 
 //stuff for GLGraphics
 GLCamera cam;
@@ -42,12 +43,15 @@ float[] texcoords;
 int numPoints = 4;
 float distance = 32800;
 float camRoll = 0;
-int fps = 30;
+int fps =30;
 
 
 //stuff for font
 PFont font;
 
+
+//stuff for tracking
+boolean TRACKING_CORNERS = false;
 
 void setup() {
   size(640, 600,GLConstants.GLGRAPHICS);
@@ -63,7 +67,7 @@ void setup() {
 
 
   //stuff for networking
-  messenger = new Messenger(this,SERVER);
+  messenger = new Messenger(this, SERVER, USE_SERVER);
 
 
   //stuff for video capture
@@ -74,7 +78,7 @@ void setup() {
   gui = new Gui(this);
 
   //stuff for tracking
-  tracking = new Tracking(this,messenger);
+  tracking = new Tracking(this, messenger, TRACKING_CORNERS);
   
 }
 
@@ -111,11 +115,12 @@ void draw() {
   }
   
   //send a message to the network
-  if(messenger.ready)
-  {
+  //println(messenger.ready);
+  //if(messenger.ready)
+  //{
     messenger.sendMessage();
     messenger.resetMessage();
-  }
+  //}
   
 }
 
@@ -172,6 +177,11 @@ void DIST(float d)
 void ROLL(float r)
 {
   graphics.ROLL(r);
+}
+
+void TRACKING(float r)
+{
+  tracking.threshold = (int)r;
 }
 
 

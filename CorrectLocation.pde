@@ -19,7 +19,7 @@ class CorrectLocation
 
 
     PVector P = _P;
-    circle(P,5);
+
 
     //HORIZONTAL LINES (y)
     if(isParallel(AB, CD))
@@ -43,7 +43,7 @@ class CorrectLocation
     }
     float x = (getAngle(DA, new Line(getIntersect(DA,BC),P))/getAngle(DA,BC));
 
-    return new PVector(x,y);
+    return new PVector(x*800,y*480);
   }
 
 
@@ -89,10 +89,7 @@ class CorrectLocation
     float mn = l1.getSlope()-l2.getSlope();
     return new PVector( (-l1.getb() + l2.getb())/mn, (l2.getb()*l1.getSlope() - l1.getb()*l2.getSlope())/mn );
   }
-  void circle(PVector p, float r)
-  {
-    ellipse(p.x,p.y,r*SCALE*2,r*SCALE*2);
-  }
+
   boolean isParallel(Line m1, Line m2)
   { 
     return m1.getSlope() == m2.getSlope(); 

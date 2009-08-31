@@ -1,6 +1,7 @@
 class Tracking
 {
-  
+
+
   int numberOfPlayers = 10;
 
   int numberOfMarkers = 4;
@@ -24,6 +25,9 @@ class Tracking
   //before we start using them to correct locations
   boolean markersSet = false; 
 
+  //this is to disable corner tracking
+  boolean trackingCorners = true;
+
   //the sketch
   PApplet parent;
 
@@ -39,10 +43,11 @@ class Tracking
   //Stuff for networking
   Messenger messenger;
 
-  Tracking(PApplet app, Messenger msg)
+  Tracking(PApplet app, Messenger msg, boolean _trackingCorners)
   {
     parent = app;
     messenger = msg;
+    trackingCorners = _trackingCorners;
 
     //init the players list
     players = new ArrayList();  
@@ -113,8 +118,59 @@ class Tracking
           }
         }
 
+        for(int j = 0; j < player.playerSize; j++)
+        {
+          ///find the left edge
+          color leftEdgeColor = testImg.get((int)player.tmpLoc.x-j, (int)player.tmpLoc.y);
+          float d = colorDistance(leftEdgeColor, player.currentColor);
+          if (d < threshold)
+          {
+            player.leftEdge = (int)player.tmpLoc.x-j;
+          }
+
+
+          ///find the top edge
+          color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
+          d = colorDistance(topEdgeColor, player.currentColor);
+          if (d < threshold)
+          {
+            player.topEdge = (int)player.tmpLoc.y-j;
+          }
+
+          ///find the right edge
+          color rightEdgeColor = testImg.get((int)player.tmpLoc.x+j, (int)player.tmpLoc.y);
+          d = colorDistance(rightEdgeColor, player.currentColor);
+          if (d < threshold)
+          {
+            player.rightEdge = (int)player.tmpLoc.x+j;
+          }
+
+
+          ///find the bottom edge
+          color bottomEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y+j);
+          d = colorDistance(bottomEdgeColor, player.currentColor);
+          if (d < threshold)
+          {
+            player.bottomEdge = (int)player.tmpLoc.y+j;
+          }
+        }
+
+        if(player.isMarker && !trackingCorners)
+        {
+          player.currentLoc = player.lastLoc;
+        }
+        else
+        {
+          player.currentLoc.x = player.leftEdge + ((player.rightEdge-player.leftEdge)/2);
+          player.currentLoc.y = player.topEdge + ((player.bottomEdge-player.topEdge)/2);
+          stroke(0,0,255);
+          strokeWeight(1);
+          noFill();
+          rect(player.leftEdge,player.topEdge,player.rightEdge-player.leftEdge,player.bottomEdge-player.topEdge);
+        }
+
         //player.currentLoc = player.tmpLoc;
-        player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
+        //player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
 
         //draw a line from the new location to last location
         stroke(255,0,0);
@@ -124,14 +180,8 @@ class Tracking
 
         //draw the new location
         noStroke();
-        if(player.isMarker)
-        {
-          fill(0,0,255);
-        }
-        else
-        {
-          fill(0,255,0); 
-        }
+        if(player.isMarker) fill(0,0,255);
+        else fill(0,255,0); 
         ellipse(player.currentLoc.x, player.currentLoc.y, 5, 5);
         //keep store the location for the next loop
         player.lastLoc = player.currentLoc;
@@ -150,6 +200,7 @@ class Tracking
     {
       Player marker = (Player) markers.get(i);
       if(!marker.active) markersSet = false;
+      else markersSet = true;
     }
     //println(markersSet);
 
@@ -166,17 +217,22 @@ class Tracking
       for(int i=0;i<players.size();i++)
       {
         Player player = (Player) players.get(i);
-        if(player.active)
+        if(player.active && !player.isMarker)
         {
           //this would be a good place to correct players location based on the movement of the filed markers
-          
+
           //use the field markers to rectify the position of eadch player
           player.rectifiedLoc = correctLocation.rectify(player.currentLoc,uL.currentLoc,uR.currentLoc,lR.currentLoc,lL.currentLoc);
-          
+
+          //draw the corrected location
+          fill(255,0,0);
+          ellipse(player.rectifiedLoc.x, player.rectifiedLoc.y, 5, 5);
           //add their rectified position to the messengers message
-          messenger.addMessage(messenger.PEGMessage("Player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y));
+          String msg = messenger.PEGMessage("player"+i, (int)player.rectifiedLoc.x, (int)player.rectifiedLoc.y);
+          messenger.addMessage(msg);
         }
         messenger.ready = true;
+        //println(messenger.ready);
       }
     }
   }
@@ -256,6 +312,4 @@ class Tracking
     return dist(r1,g1,b1,r2,g2,b2);
   }
 }
-
-
 
