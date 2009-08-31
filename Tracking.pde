@@ -1,6 +1,7 @@
 class Tracking
 {
 
+
   int numberOfPlayers = 10;
 
   int numberOfMarkers = 4;
@@ -24,6 +25,9 @@ class Tracking
   //before we start using them to correct locations
   boolean markersSet = false; 
 
+  //this is to disable corner tracking
+  boolean trackingCorners = true;
+
   //the sketch
   PApplet parent;
 
@@ -39,10 +43,11 @@ class Tracking
   //Stuff for networking
   Messenger messenger;
 
-  Tracking(PApplet app, Messenger msg)
+  Tracking(PApplet app, Messenger msg, boolean _trackingCorners)
   {
     parent = app;
     messenger = msg;
+    trackingCorners = _trackingCorners;
 
     //init the players list
     players = new ArrayList();  
@@ -122,8 +127,8 @@ class Tracking
           {
             player.leftEdge = (int)player.tmpLoc.x-j;
           }
-          
-          
+
+
           ///find the top edge
           color topEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y-j);
           d = colorDistance(topEdgeColor, player.currentColor);
@@ -131,7 +136,7 @@ class Tracking
           {
             player.topEdge = (int)player.tmpLoc.y-j;
           }
-          
+
           ///find the right edge
           color rightEdgeColor = testImg.get((int)player.tmpLoc.x+j, (int)player.tmpLoc.y);
           d = colorDistance(rightEdgeColor, player.currentColor);
@@ -139,8 +144,8 @@ class Tracking
           {
             player.rightEdge = (int)player.tmpLoc.x+j;
           }
-          
-          
+
+
           ///find the bottom edge
           color bottomEdgeColor = testImg.get((int)player.tmpLoc.x, (int)player.tmpLoc.y+j);
           d = colorDistance(bottomEdgeColor, player.currentColor);
@@ -150,13 +155,20 @@ class Tracking
           }
         }
 
-        
-        player.currentLoc.x = player.leftEdge + ((player.rightEdge-player.leftEdge)/2);
-        player.currentLoc.y = player.topEdge + ((player.bottomEdge-player.topEdge)/2);
-        stroke(0,0,255);
-        strokeWeight(1);
-        noFill();
-        rect(player.leftEdge,player.topEdge,player.rightEdge-player.leftEdge,player.bottomEdge-player.topEdge);
+        if(player.isMarker && !trackingCorners)
+        {
+          player.currentLoc = player.lastLoc;
+        }
+        else
+        {
+          player.currentLoc.x = player.leftEdge + ((player.rightEdge-player.leftEdge)/2);
+          player.currentLoc.y = player.topEdge + ((player.bottomEdge-player.topEdge)/2);
+          stroke(0,0,255);
+          strokeWeight(1);
+          noFill();
+          rect(player.leftEdge,player.topEdge,player.rightEdge-player.leftEdge,player.bottomEdge-player.topEdge);
+        }
+
         //player.currentLoc = player.tmpLoc;
         //player.currentLoc = PVector.div(PVector.add(player.tmpLoc, player.lastLoc), 2);
 
@@ -298,6 +310,8 @@ class Tracking
     return dist(r1,g1,b1,r2,g2,b2);
   }
 }
+
+
 
 
 

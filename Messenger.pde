@@ -36,7 +36,7 @@ class Messenger
     //println("hello");
   }
 
-  String PEGMessage(String name, int y, int x)
+  String PEGMessage(String name, int x, int y)
   {
     String msg = "";
     msg += zfill("name",20);
